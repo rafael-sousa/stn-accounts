@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
+	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/jwt"
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/routing"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/env"
 	"github.com/rafael-sousa/stn-accounts/pkg/service"
@@ -38,7 +39,11 @@ func (s *server) Start(cfg *env.RestConfig) error {
 	for _, md := range s.middlewares {
 		r.Use(md)
 	}
+	jwtH := jwt.NewHandler(cfg)
 	r.Route("/accounts", routing.Accounts(s.accountServ))
+	r.Route("/transfers", routing.Transfers(s.transferServ, jwtH))
+	r.Route("/login", routing.Login(s.accountServ, jwtH))
+	r.NotFound(routing.NotFound)
 	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("doc.json")))
 	if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Port), r); err != nil {
 		return fmt.Errorf("Failed to start and listen the http server at port %d, %v", cfg.Port, err)

@@ -1,0 +1,291 @@
+definitions:
+  body.JSONError:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+      time:
+        type: string
+    type: object
+  body.LoginRequest:
+    properties:
+      cpf:
+        maxLength: 11
+        minLength: 11
+        type: string
+      secret:
+        maxLength: 50
+        minLength: 1
+        type: string
+    type: object
+  body.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      token_type:
+        type: string
+    type: object
+  dto.AccountCreation:
+    properties:
+      balance:
+        minimum: 0
+        type: number
+      cpf:
+        example: "11881200000"
+        maxLength: 11
+        minLength: 11
+        type: string
+      name:
+        example: José da Silva
+        maxLength: 255
+        minLength: 1
+        type: string
+      secret:
+        example: super_secret
+        maxLength: 50
+        minLength: 1
+        type: string
+    required:
+    - name
+    type: object
+  dto.AccountView:
+    properties:
+      balance:
+        type: number
+      cpf:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dto.TransferCreation:
+    properties:
+      account_destination_id:
+        minimum: 1
+        type: integer
+      amount:
+        minimum: 0.01
+        type: number
+    type: object
+  dto.TransferView:
+    properties:
+      account_destination_id:
+        type: integer
+      amount:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: integer
+    type: object
+info:
+  contact:
+    email: rafaelsj7@gmail.com
+    name: Rafael S.
+    url: github.com/rafael-sousa
+  description: Application that exposes a REST API.
+  license:
+    name: MIT
+    url: path to git repo
+  title: Account REST API
+  version: "1.0"
+paths:
+  /accounts:
+    get:
+      consumes:
+      - application/json
+      operationId: fetch-account-list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.AccountView'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/body.JSONError'
+      summary: Fetches a list of application accounts
+      tags:
+      - v1
+    post:
+      consumes:
+      - application/json
+      operationId: post-account-create
+      parameters:
+      - description: Account Creation Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AccountCreation'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.AccountView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/body.JSONError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/body.JSONError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/body.JSONError'
+      summary: Creates a new account
+      tags:
+      - v1
+  /accounts/{id}/balance:
+    get:
+      consumes:
+      - application/json
+      operationId: get-account-balance
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: number
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/body.JSONError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/body.JSONError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/body.JSONError'
+      summary: Gets the current account balance specified by the given ID
+      tags:
+      - v1
+  /login:
+    post:
+      consumes:
+      - application/json
+      operationId: post-login
+      parameters:
+      - description: Login Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/body.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/body.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/body.JSONError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/body.JSONError'
+      summary: Generates a new authorization token
+      tags:
+      - v1
+  /transfers:
+    get:
+      consumes:
+      - application/json
+      operationId: get-transfer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.TransferView'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/body.JSONError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/body.JSONError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/body.JSONError'
+      security:
+      - ApiKeyAuth: []
+      summary: Gets the list of tranfers for the current authenticated user
+      tags:
+      - v1
+    post:
+      consumes:
+      - application/json
+      operationId: post-transfer
+      parameters:
+      - description: Transfer Creation Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TransferCreation'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.TransferView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/body.JSONError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/body.JSONError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/body.JSONError'
+      security:
+      - ApiKeyAuth: []
+      summary: Creates a new transfer
+      tags:
+      - v1
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

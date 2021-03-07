@@ -16,6 +16,14 @@ type accountHandler struct {
 	accountServ *service.Account
 }
 
+// @Summary Fetches a list of application accounts
+// @tags v1
+// @ID fetch-account-list
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} dto.AccountView
+// @Failure 500 {object} body.JSONError
+// @Router /accounts [get]
 func (h accountHandler) get(w http.ResponseWriter, r *http.Request) {
 	accs, err := (*h.accountServ).Fetch(r.Context())
 	if err != nil {
@@ -28,6 +36,17 @@ func (h accountHandler) get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Gets the current account balance specified by the given ID
+// @tags v1
+// @ID get-account-balance
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Account ID"
+// @Success 200 {object} float64
+// @Failure 400 {object} body.JSONError
+// @Failure 404 {object} body.JSONError
+// @Failure 500 {object} body.JSONError
+// @Router /accounts/{id}/balance [get]
 func (h *accountHandler) getBalance(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -46,6 +65,18 @@ func (h *accountHandler) getBalance(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Creates a new account
+// @tags v1
+// @ID post-account-create
+// @Accept  json
+// @Produce  json
+// @Param req body dto.AccountCreation required "Account Creation Request"
+// @Header 201 {string} Location "/accounts/1"
+// @Success 201 {object} dto.AccountView
+// @Failure 400 {object} body.JSONError
+// @Failure 409 {object} body.JSONError
+// @Failure 500 {object} body.JSONError
+// @Router /accounts [post]
 func (h *accountHandler) post(w http.ResponseWriter, r *http.Request) {
 	var d dto.AccountCreation
 	err := json.NewDecoder(r.Body).Decode(&d)

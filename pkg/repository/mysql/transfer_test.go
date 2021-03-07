@@ -15,11 +15,11 @@ func TestTransferRepositoryFetch(t *testing.T) {
 	repo := mysql.NewTransfer(&txr)
 	tt := []struct {
 		name         string
-		expectedSize int64
+		expectedSize int
 		prepare      func(*testing.T) (int64, int64, int64)
 	}{
 		{
-			name:         "fetch transfer with result",
+			name:         "fetch transfers with result",
 			expectedSize: 1,
 			prepare: func(t *testing.T) (int64, int64, int64) {
 				t.Cleanup(dbWipe)
@@ -51,7 +51,7 @@ func TestTransferRepositoryFetch(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			origin, _, _ := tc.prepare(t)
 			if transfers, err := repo.Fetch(context.Background(), origin); err == nil {
-				if len(transfers) != int(tc.expectedSize) {
+				if len(transfers) != tc.expectedSize {
 					t.Errorf("expected return size equal to '%d' but got '%d'", tc.expectedSize, len(transfers))
 				}
 			} else {
@@ -70,7 +70,7 @@ func TestTransferRepositoryCreate(t *testing.T) {
 		prepare      func(*testing.T) *entity.Transfer
 	}{
 		{
-			name:         "fetch transfer with result",
+			name:         "create transfer with result",
 			expectedSize: 1,
 			prepare: func(t *testing.T) *entity.Transfer {
 				t.Cleanup(dbWipe)

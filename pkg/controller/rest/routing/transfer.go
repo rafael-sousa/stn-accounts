@@ -18,6 +18,17 @@ type router struct {
 	transferServ *service.Transfer
 }
 
+// @ID get-transfer
+// @tags v1
+// @Summary Gets the list of tranfers for the current authenticated user
+// @Accept json
+// @Produce json
+// @Success 200 {array} dto.TransferView
+// @Failure 400 {object} body.JSONError
+// @Failure 404 {object} body.JSONError
+// @Failure 500 {object} body.JSONError
+// @Router /transfers [get]
+// @Security ApiKeyAuth
 func (h *router) get(w http.ResponseWriter, r *http.Request) {
 	id, ok := r.Context().Value(middleware.CtxAccountID).(int64)
 	if !ok {
@@ -35,6 +46,19 @@ func (h *router) get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @ID post-transfer
+// @tags v1
+// @Summary Creates a new transfer
+// @Accept  json
+// @Produce  json
+// @Param req body dto.TransferCreation required "Transfer Creation Request"
+// @Header 201 {string} Location "/transfers/1"
+// @Success 201 {object} dto.TransferView
+// @Failure 400 {object} body.JSONError
+// @Failure 404 {object} body.JSONError
+// @Failure 500 {object} body.JSONError
+// @Router /transfers [post]
+// @Security ApiKeyAuth
 func (h *router) post(w http.ResponseWriter, r *http.Request) {
 	id, ok := r.Context().Value(middleware.CtxAccountID).(int64)
 	if !ok {

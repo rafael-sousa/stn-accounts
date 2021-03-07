@@ -17,6 +17,16 @@ type loginHandler struct {
 	jwtH        *jwt.Handler
 }
 
+// @ID post-login
+// @tags v1
+// @Summary Generates a new authorization token
+// @Accept  json
+// @Produce  json
+// @Param req body body.LoginRequest required "Login Request"
+// @Success 200 {object} body.LoginResponse
+// @Failure 400 {object} body.JSONError
+// @Failure 500 {object} body.JSONError
+// @Router /login [post]
 func (h *loginHandler) post(w http.ResponseWriter, r *http.Request) {
 	b := body.LoginRequest{}
 	err := json.NewDecoder(r.Body).Decode(&b)

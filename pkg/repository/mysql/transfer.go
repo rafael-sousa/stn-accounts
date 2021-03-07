@@ -14,8 +14,8 @@ type transfer struct {
 
 var _ repository.Transfer = (*transfer)(nil)
 
-func (r *transfer) Fetch(ctx context.Context, id int64) ([]*entity.Transfer, error) {
-	rows, err := (*r.txr).GetConn(ctx).QueryContext(ctx, "SELECT id, account_origin_id, account_destination_id, amount, created_at FROM transfer WHERE id=?", id)
+func (r *transfer) Fetch(ctx context.Context, origin int64) ([]*entity.Transfer, error) {
+	rows, err := (*r.txr).GetConn(ctx).QueryContext(ctx, "SELECT id, account_origin_id, account_destination_id, amount, created_at FROM transfer WHERE account_origin_id=?", origin)
 	if err != nil {
 		return nil, types.NewErr(types.SelectStmtErr, "querying transfers by id", &err)
 	}

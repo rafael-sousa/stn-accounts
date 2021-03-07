@@ -13,6 +13,7 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/ory/dockertest/v3 v3.6.3
 	github.com/rs/zerolog v1.20.0
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
 	google.golang.org/grpc v1.36.0 // indirect
 )

@@ -27,14 +27,19 @@ func (v *Transfer) Creation(ctx context.Context, origin int64, d *dto.TransferCr
 	}
 	oBalance, err := (*v.AccountRepo).GetBalance(ctx, origin)
 	if err != nil {
-		return notFoundErr("origin", origin)
+		if customErr, ok := err.(*types.Err); ok && customErr.Code == types.EmptyResultErr {
+			return notFoundErr("origin", origin)
+		}
+		return err
 	}
 	b := int64(oBalance) - int64(d.Amount*100)
 	if b < 0 {
 		return types.NewErr(types.ValidationErr, fmt.Sprintf("the origin must have a balance greater than or equal to %.2f", d.Amount), nil)
 	}
-	_, err = (*v.AccountRepo).GetBalance(ctx, d.Destination)
+	exists, err := (*v.AccountRepo).Exists(ctx, d.Destination)
 	if err != nil {
+		return err
+	} else if !exists {
 		return notFoundErr("destination", origin)
 	}
 	return nil

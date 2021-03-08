@@ -13,8 +13,8 @@ import (
 // DatabaseConfig maintains the database connection settings
 type DatabaseConfig struct {
 	Port            int    `env:"DB_PORT,default=3306"`
-	User            string `env:"DB_USER,default=root"`
-	Password        string `env:"DB_PW,default=root"`
+	User            string `env:"DB_USER,default=admin"`
+	Password        string `env:"DB_PW,default=admin"`
 	Host            string `env:"DB_HOST,default=localhost"`
 	Name            string `env:"DB_NAME,default=stn_accounts"`
 	Driver          string `env:"DB_DRIVER,default=mysql"`

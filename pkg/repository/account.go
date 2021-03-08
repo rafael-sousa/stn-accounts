@@ -15,5 +15,6 @@ type Account interface {
 	Create(ctx context.Context, e *entity.Account) (*entity.Account, error)
 	GetBalance(ctx context.Context, id int64) (types.Currency, error)
 	FindBy(ctx context.Context, cpf string) (*entity.Account, error)
+	Exists(ctx context.Context, id int64) (bool, error)
 	UpdateBalance(ctx context.Context, id int64, b types.Currency) error
 }

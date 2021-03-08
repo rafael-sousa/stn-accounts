@@ -28,6 +28,7 @@ type accountRepoMock struct {
 	getBalance    func(context.Context, int64) (types.Currency, error)
 	findBy        func(context.Context, string) (*entity.Account, error)
 	updateBalance func(context.Context, int64, types.Currency) error
+	exists        func(context.Context, int64) (bool, error)
 }
 
 func (r *accountRepoMock) Fetch(ctx context.Context) ([]*entity.Account, error) {
@@ -44,6 +45,10 @@ func (r *accountRepoMock) FindBy(ctx context.Context, cpf string) (*entity.Accou
 }
 func (r *accountRepoMock) UpdateBalance(ctx context.Context, id int64, b types.Currency) error {
 	return r.updateBalance(ctx, id, b)
+}
+
+func (r *accountRepoMock) Exists(ctx context.Context, id int64) (bool, error) {
+	return r.exists(ctx, id)
 }
 
 type transferRepoMock struct {

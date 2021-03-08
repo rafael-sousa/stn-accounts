@@ -284,3 +284,40 @@ func TestAccountRepositoryUpdateBalance(t *testing.T) {
 		})
 	}
 }
+
+func TestAccountRepositoryExists(t *testing.T) {
+	repo := mysql.NewAccount(&txr)
+	tt := []struct {
+		name     string
+		input    *entity.Account
+		prepare  func(*testing.T, *entity.Account)
+		expected bool
+	}{
+		{
+			name:  "existing account",
+			input: newAccount(0, "William", "77777777771", "S701", 701),
+			prepare: func(t *testing.T, e *entity.Account) {
+				persistTestAccountEntity(t, []*entity.Account{e})
+			},
+			expected: true,
+		},
+		{
+			name:    "nonexisting account",
+			input:   newAccount(0, "James", "77777777771", "S702", 702),
+			prepare: func(t *testing.T, e *entity.Account) {},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.prepare(t, tc.input)
+			if exists, err := repo.Exists(context.Background(), tc.input.ID); err == nil {
+				if exists != tc.expected {
+					t.Errorf("expected account existance equal to '%v' but got '%v'", tc.expected, exists)
+				}
+			} else {
+				t.Error(err)
+			}
+		})
+	}
+}

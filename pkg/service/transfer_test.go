@@ -80,7 +80,9 @@ func TestTransferServiceFetch(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			s := service.NewTransfer(&txr, tc.transferRepo(tc.id), tc.accountRepo())
+			transferRepo := tc.transferRepo(tc.id)
+			accRepo := tc.accountRepo()
+			s := service.NewTransfer(&txr, &transferRepo, &accRepo)
 			transfers, err := s.Fetch(context.Background(), tc.id)
 			if err == nil && tc.assertErr == nil {
 				assertEq(t, "transfers size", len(transfers), tc.expectedSize)
@@ -316,7 +318,9 @@ func TestTransferServiceCreate(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			s := service.NewTransfer(&txr, tc.transferRepo(tc.origin, tc.d), tc.accountRepo(tc.origin, tc.d))
+			transferRepo := tc.transferRepo(tc.origin, tc.d)
+			accRepo := tc.accountRepo(tc.origin, tc.d)
+			s := service.NewTransfer(&txr, &transferRepo, &accRepo)
 			view, err := s.Create(context.Background(), tc.origin, tc.d)
 			if err == nil && tc.assertErr == nil {
 				assertNotDefault(t, "id", view.ID)

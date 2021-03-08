@@ -31,7 +31,7 @@ func (h *loginHandler) post(w http.ResponseWriter, r *http.Request) {
 	b := body.LoginRequest{}
 	err := json.NewDecoder(r.Body).Decode(&b)
 	if err != nil {
-		log.Error().Caller().Err(err).Msg("unable to decode the request payload as a login creation")
+		log.Error().Caller().Err(err).Msg("unable to decode request body as body.LoginRequest")
 		response.WriteErr(w, r, err)
 		return
 	}
@@ -52,7 +52,7 @@ func (h *loginHandler) post(w http.ResponseWriter, r *http.Request) {
 		ExpiresIn:   int(claims.ExpiresAt) - int(claims.IssuedAt),
 	}
 	if err = response.WriteSuccess(w, r, p, nil); err != nil {
-		log.Error().Caller().Err(err).Msg("unable to encode the login info into the response")
+		log.Error().Caller().Err(err).Msg("unable to encode body.LoginResponse into response")
 		response.WriteErr(w, r, err)
 	}
 }

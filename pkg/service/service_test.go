@@ -59,7 +59,7 @@ func (r *transferRepoMock) Create(ctx context.Context, e *entity.Transfer) (*ent
 	return r.create(ctx, e)
 }
 
-var txr transactionerMock
+var txr repository.Transactioner
 
 func assertEq(t *testing.T, n string, expected interface{}, current interface{}) {
 	if expected != current {
@@ -126,6 +126,6 @@ func newTransfer(id, origin, destination int64, b float64) *entity.Transfer {
 }
 
 func TestMain(m *testing.M) {
-	txr = transactionerMock{}
+	txr = &transactionerMock{}
 	os.Exit(m.Run())
 }

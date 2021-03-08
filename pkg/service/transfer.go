@@ -103,13 +103,13 @@ func (s *transfer) Create(ctx context.Context, origin int64, d *dto.TransferCrea
 }
 
 // NewTransfer returns a value responsible for managing entity.Transfer integrity
-func NewTransfer(txr repository.Transactioner, transferRepo repository.Transfer, accountRepo repository.Account) Transfer {
+func NewTransfer(txr *repository.Transactioner, transferRepo *repository.Transfer, accountRepo *repository.Account) Transfer {
 	return &transfer{
-		transferRepo: &transferRepo,
-		accountRepo:  &accountRepo,
-		txr:          &txr,
+		transferRepo: transferRepo,
+		accountRepo:  accountRepo,
+		txr:          txr,
 		transferVali: &validation.Transfer{
-			AccountRepo: &accountRepo,
+			AccountRepo: accountRepo,
 		},
 	}
 }

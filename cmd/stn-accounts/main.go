@@ -59,8 +59,8 @@ func main() {
 	txr := repository.NewTxr(db)
 	accountRepo := mysql.NewAccount(&txr)
 	transferRepo := mysql.NewTransfer(&txr)
-	accountServ := service.NewAccount(txr, accountRepo)
-	transferServ := service.NewTransfer(txr, transferRepo, accountRepo)
+	accountServ := service.NewAccount(&txr, &accountRepo)
+	transferServ := service.NewTransfer(&txr, &transferRepo, &accountRepo)
 	server := rest.NewServer(&accountServ, &transferServ)
 
 	server.Use(middleware.RequestID, middleware.RealIP, middleware.Logger, middleware.Recoverer)

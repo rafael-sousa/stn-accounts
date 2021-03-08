@@ -110,12 +110,12 @@ func (s *account) Login(ctx context.Context, cpf string, secret string) (*dto.Ac
 }
 
 // NewAccount returns a value responsible for managing entity.Account actions and integrity
-func NewAccount(txr repository.Transactioner, accountRepo repository.Account) Account {
+func NewAccount(txr *repository.Transactioner, accountRepo *repository.Account) Account {
 	return &account{
-		accountRepo: &accountRepo,
-		txr:         &txr,
+		accountRepo: accountRepo,
+		txr:         txr,
 		accountVali: &validation.Account{
-			AccountRepo: &accountRepo,
+			AccountRepo: accountRepo,
 		},
 	}
 }

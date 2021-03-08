@@ -32,7 +32,7 @@ type router struct {
 func (h *router) get(w http.ResponseWriter, r *http.Request) {
 	id, ok := r.Context().Value(middleware.CtxAccountID).(int64)
 	if !ok {
-		response.WriteErr(w, r, types.NewErr(types.InternalErr, "unable to get account id from the current request context", nil))
+		response.WriteErr(w, r, types.NewErr(types.InternalErr, "unable to get account id from request context", nil))
 		return
 	}
 	transfers, err := (*h.transferServ).Fetch(r.Context(), id)
@@ -62,13 +62,13 @@ func (h *router) get(w http.ResponseWriter, r *http.Request) {
 func (h *router) post(w http.ResponseWriter, r *http.Request) {
 	id, ok := r.Context().Value(middleware.CtxAccountID).(int64)
 	if !ok {
-		response.WriteErr(w, r, types.NewErr(types.InternalErr, "unable to get account id from the current request context", nil))
+		response.WriteErr(w, r, types.NewErr(types.InternalErr, "unable to get account id from request context", nil))
 		return
 	}
 	var d dto.TransferCreation
 	err := json.NewDecoder(r.Body).Decode(&d)
 	if err != nil {
-		log.Error().Caller().Err(err).Msg("unable to decode the request payload as a transfer creation")
+		log.Error().Caller().Err(err).Msg("unable to decode request body as transfer creation")
 		response.WriteErr(w, r, err)
 		return
 	}
@@ -79,7 +79,7 @@ func (h *router) post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err = response.WriteSuccess(w, r, t, t.ID); err != nil {
-		log.Error().Caller().Err(err).Msg("unable to encode the transfer into the response")
+		log.Error().Caller().Err(err).Msg("unable to encode transfer into response")
 		response.WriteErr(w, r, err)
 	}
 }

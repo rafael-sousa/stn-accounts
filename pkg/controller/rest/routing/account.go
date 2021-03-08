@@ -50,7 +50,7 @@ func (h accountHandler) get(w http.ResponseWriter, r *http.Request) {
 func (h *accountHandler) getBalance(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
-		log.Error().Caller().Err(err).Msg("unable to parse the id from param from the request URL")
+		log.Error().Caller().Err(err).Msg("unable to parse the id param from request URL")
 		response.WriteErr(w, r, err)
 		return
 	}
@@ -82,6 +82,7 @@ func (h *accountHandler) post(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&d)
 	if err != nil {
 		log.Error().Caller().Err(err).Msg("unable to decode the account creation from the request body")
+		response.WriteErr(w, r, nil)
 		return
 	}
 	e, err := (*h.accountServ).Create(r.Context(), &d)

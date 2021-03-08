@@ -69,7 +69,8 @@ func TestAccountServiceCreate(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			s := service.NewAccount(&txr, tc.repo(tc.d))
+			repo := tc.repo(tc.d)
+			s := service.NewAccount(&txr, &repo)
 			acc, err := s.Create(context.Background(), tc.d)
 			if err == nil && tc.assertErr == nil {
 				assertNotDefault(t, "id", acc.ID)
@@ -134,7 +135,8 @@ func TestAccountServiceFetch(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			s := service.NewAccount(&txr, tc.repo())
+			repo := tc.repo()
+			s := service.NewAccount(&txr, &repo)
 			accs, err := s.Fetch(context.Background())
 			if err == nil && tc.assertErr == nil {
 				assertEq(t, "accs size", len(accs), tc.expectedSize)
@@ -191,7 +193,8 @@ func TestAccountServiceGetBalance(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			s := service.NewAccount(&txr, tc.repo(tc.id, tc.expected))
+			repo := tc.repo(tc.id, tc.expected)
+			s := service.NewAccount(&txr, &repo)
 			balance, err := s.GetBalance(context.Background(), tc.id)
 			assertEq(t, "balance", tc.expected, balance)
 			if err != nil {
@@ -294,7 +297,8 @@ func TestAccountServiceLogin(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			s := service.NewAccount(&txr, tc.repo(tc.expected))
+			repo := tc.repo(tc.expected)
+			s := service.NewAccount(&txr, &repo)
 			view, err := s.Login(context.Background(), tc.cpf, tc.secret)
 			if err != nil {
 				tc.assertErr(t, err)

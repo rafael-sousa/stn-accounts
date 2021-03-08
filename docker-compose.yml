@@ -20,6 +20,14 @@ services:
             - db
         command: -source=file://migrations -database mysql://admin:admin@tcp(db:3306)/stn_accounts?multiStatements=true up
         restart: on-failure
+    rest:
+        build: .
+        depends_on:
+            - db
+        environment: 
+            PORT: 3000
+        ports:
+            - 3000:3000
 volumes: 
     db-data:
 

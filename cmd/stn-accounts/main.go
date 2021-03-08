@@ -65,10 +65,5 @@ func main() {
 
 	server.Use(middleware.RequestID, middleware.RealIP, middleware.Logger, middleware.Recoverer)
 
-	err = server.Start(&restConfig)
-	if err != nil {
-		log.Fatal().
-			Err(err).
-			Msg("Unable to start the application REST Api")
-	}
+	server.Start(&restConfig)
 }

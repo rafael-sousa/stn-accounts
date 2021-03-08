@@ -7,12 +7,15 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/mysql"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/ory/dockertest/v3"
+	"github.com/rafael-sousa/stn-accounts/pkg/model/entity"
+	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 	"github.com/rafael-sousa/stn-accounts/pkg/repository"
 )
 
@@ -45,6 +48,17 @@ func TestMain(m *testing.M) {
 	logFatal(err, "unable to purge db container")
 
 	os.Exit(code)
+}
+
+func newAccount(id int64, n, cpf, s string, b float64) *entity.Account {
+	return &entity.Account{
+		ID:        id,
+		Name:      n,
+		CPF:       cpf,
+		Secret:    s,
+		Balance:   types.NewCurrency(b),
+		CreatedAt: time.Now().UTC().Truncate(time.Second),
+	}
 }
 
 func runMigrations(pool *dockertest.Pool) {

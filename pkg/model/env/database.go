@@ -13,10 +13,10 @@ import (
 // DatabaseConfig maintains the database connection settings
 type DatabaseConfig struct {
 	Port            int    `env:"DB_PORT,default=3306"`
-	User            string `env:"DB_USER,default=admin"`
-	Password        string `env:"DB_PW,default=admin"`
+	User            string `env:"DB_USER,default=root"`
+	Password        string `env:"DB_PW,default=root"`
 	Host            string `env:"DB_HOST,default=localhost"`
-	Name            string `env:"DB_NAME,default=rip_go"`
+	Name            string `env:"DB_NAME,default=stn_accounts"`
 	Driver          string `env:"DB_DRIVER,default=mysql"`
 	MaxOpenConns    int    `env:"DB_MAX_OPEN_CONNS,default=10"`
 	MaxIdleConns    int    `env:"DB_MAX_IDLE_CONNS,default=10"`

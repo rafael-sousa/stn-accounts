@@ -26,8 +26,9 @@ services:
             - db
         environment: 
             PORT: 3000
+            DB_HOST: db
         ports:
-            - 3000:3000
+           - 3000:3000
 volumes: 
     db-data:
 

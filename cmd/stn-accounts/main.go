@@ -47,7 +47,7 @@ func main() {
 			Str("db_name", dbConfig.Name).
 			Str("db_host", dbConfig.Host).
 			Int("db_port", dbConfig.Port).
-			Msg("Unable to start the application REST Api")
+			Msg("Unable to open database connection pool")
 	}
 	defer db.Close()
 

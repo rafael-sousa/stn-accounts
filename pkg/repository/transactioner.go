@@ -30,7 +30,7 @@ func (manager *transactioner) WithTx(ctx context.Context, f func(context.Context
 	ctxTx := ctx.Value(CtxTxKey)
 
 	if ctxTx == nil {
-		ctxTx, err := manager.db.BeginTx(ctx, nil)
+		ctxTx, err = manager.db.BeginTx(ctx, nil)
 		if err != nil {
 			return types.NewErr(types.InternalErr, "unable to begin tx", &err)
 		}

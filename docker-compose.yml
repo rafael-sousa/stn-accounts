@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+    db:
+        image: "mysql:5.6"
+        environment:
+            MYSQL_DATABASE: stn_accounts
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_USER: admin
+            MYSQL_PASSWORD: admin
+        ports: 
+            - 3306:3306
+        volumes: 
+            - db-data:/var/lib/mysql/data
+    db-migration:
+        image: migrate/migrate
+        volumes:
+            - ./pkg/repository/mysql/migrations:/migrations
+        depends_on:
+            - db
+        command: -source=file://migrations -database mysql://admin:admin@tcp(db:3306)/stn_accounts?multiStatements=true up
+        restart: on-failure
+volumes: 
+    db-data:
+

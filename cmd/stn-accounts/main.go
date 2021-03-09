@@ -63,7 +63,7 @@ func main() {
 	transferServ := service.NewTransfer(&txr, &transferRepo, &accountRepo)
 	server := rest.NewServer(&accountServ, &transferServ)
 
-	server.Use(middleware.RequestID, middleware.RealIP, middleware.Logger, middleware.Recoverer)
+	server.Use(middleware.Logger, middleware.Recoverer)
 
 	server.Start(&restConfig)
 }

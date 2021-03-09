@@ -78,14 +78,14 @@ func (h *accountHandler) getBalance(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} body.JSONError
 // @Router /accounts [post]
 func (h *accountHandler) post(w http.ResponseWriter, r *http.Request) {
-	var d dto.AccountCreation
-	err := json.NewDecoder(r.Body).Decode(&d)
+	var accountCreation dto.AccountCreation
+	err := json.NewDecoder(r.Body).Decode(&accountCreation)
 	if err != nil {
 		log.Error().Caller().Err(err).Msg("unable to decode the account creation from the request body")
 		response.WriteErr(w, r, nil)
 		return
 	}
-	view, err := (*h.accountSrv).Create(r.Context(), &d)
+	view, err := (*h.accountSrv).Create(r.Context(), &accountCreation)
 	if err != nil {
 		response.WriteErr(w, r, err)
 		return

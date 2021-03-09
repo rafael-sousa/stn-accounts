@@ -41,19 +41,19 @@ func (h *Handler) Parse(tokenString string) (*jwtgo.StandardClaims, error) {
 		return h.secret, nil
 	})
 	if ve, ok := err.(*jwtgo.ValidationError); ok {
-		if ve.Errors&jwtgo.ValidationErrorMalformed != 0 {
+		switch {
+		case ve.Errors&jwtgo.ValidationErrorMalformed != 0:
 			return nil, types.NewErr(types.AuthenticationErr, "malformed jwt token", nil)
-		} else if ve.Errors&(jwtgo.ValidationErrorExpired|jwtgo.ValidationErrorNotValidYet) != 0 {
+		case ve.Errors&(jwtgo.ValidationErrorExpired|jwtgo.ValidationErrorNotValidYet) != 0:
 			return nil, types.NewErr(types.AuthenticationErr, "expired or premature jwt token", nil)
+		case ve.Errors&jwtgo.ValidationErrorSignatureInvalid != 0:
+			return nil, types.NewErr(types.AuthenticationErr, "invalid token signature", nil)
 		}
 	}
-	if err != nil {
-		return nil, err
+	if err != nil || !token.Valid {
+		return nil, types.NewErr(types.AuthenticationErr, "unexpected token format", &err)
 	}
-	if token.Valid {
-		return claims, nil
-	}
-	return nil, types.NewErr(types.AuthenticationErr, "unexpected token format", nil)
+	return claims, nil
 }
 
 // NewHandler creates a new JWT Handler

@@ -121,7 +121,7 @@ func TestTransferServiceCreate(t *testing.T) {
 				}
 			},
 			accountRepo: func(origin int64, d *dto.TransferCreation) repository.Account {
-				balanceStack := []float64{500, 0, 500, 0}
+				balanceStack := []float64{500, 500, 0}
 				return &accountRepoMock{
 					getBalance: func(c context.Context, i int64) (types.Currency, error) {
 						if len(balanceStack) == 0 {
@@ -141,6 +141,10 @@ func TestTransferServiceCreate(t *testing.T) {
 							t.Fatalf("unexpected method call")
 						}
 						return nil
+					},
+					exists: func(c context.Context, i int64) (bool, error) {
+						assertEq(t, "destination id", d.Destination, i)
+						return true, nil
 					},
 				}
 			},
@@ -194,7 +198,7 @@ func TestTransferServiceCreate(t *testing.T) {
 				return &transferRepoMock{}
 			},
 			accountRepo: func(origin int64, d *dto.TransferCreation) repository.Account {
-				balanceStack := []float64{500, 0}
+				balanceStack := []float64{500}
 				return &accountRepoMock{
 					getBalance: func(c context.Context, i int64) (types.Currency, error) {
 						if len(balanceStack) == 0 {
@@ -203,6 +207,10 @@ func TestTransferServiceCreate(t *testing.T) {
 						b := types.NewCurrency(balanceStack[0])
 						balanceStack = balanceStack[1:]
 						return b, nil
+					},
+					exists: func(c context.Context, i int64) (bool, error) {
+						assertEq(t, "destination id", d.Destination, i)
+						return true, nil
 					},
 				}
 			},
@@ -221,7 +229,7 @@ func TestTransferServiceCreate(t *testing.T) {
 				return &transferRepoMock{}
 			},
 			accountRepo: func(origin int64, d *dto.TransferCreation) repository.Account {
-				balanceStack := []float64{500, 0, 500}
+				balanceStack := []float64{500, 500}
 				return &accountRepoMock{
 					getBalance: func(c context.Context, i int64) (types.Currency, error) {
 						if len(balanceStack) == 0 {
@@ -230,6 +238,10 @@ func TestTransferServiceCreate(t *testing.T) {
 						b := types.NewCurrency(balanceStack[0])
 						balanceStack = balanceStack[1:]
 						return b, nil
+					},
+					exists: func(c context.Context, i int64) (bool, error) {
+						assertEq(t, "destination id", d.Destination, i)
+						return true, nil
 					},
 				}
 			},
@@ -248,7 +260,7 @@ func TestTransferServiceCreate(t *testing.T) {
 				return &transferRepoMock{}
 			},
 			accountRepo: func(origin int64, d *dto.TransferCreation) repository.Account {
-				balanceStack := []float64{500, 0, 500, 0}
+				balanceStack := []float64{500, 500, 0}
 				return &accountRepoMock{
 					getBalance: func(c context.Context, i int64) (types.Currency, error) {
 						if len(balanceStack) == 0 {
@@ -264,6 +276,10 @@ func TestTransferServiceCreate(t *testing.T) {
 						}
 						t.Fatalf("unexpected method call")
 						return nil
+					},
+					exists: func(c context.Context, i int64) (bool, error) {
+						assertEq(t, "destination id", d.Destination, i)
+						return true, nil
 					},
 				}
 			},
@@ -282,7 +298,7 @@ func TestTransferServiceCreate(t *testing.T) {
 				return &transferRepoMock{}
 			},
 			accountRepo: func(origin int64, d *dto.TransferCreation) repository.Account {
-				balanceStack := []float64{500, 0, 500, 0}
+				balanceStack := []float64{500, 500, 0}
 				return &accountRepoMock{
 					getBalance: func(c context.Context, i int64) (types.Currency, error) {
 						if len(balanceStack) == 0 {
@@ -302,6 +318,10 @@ func TestTransferServiceCreate(t *testing.T) {
 							t.Fatalf("unexpected method call")
 						}
 						return nil
+					},
+					exists: func(c context.Context, i int64) (bool, error) {
+						assertEq(t, "destination id", d.Destination, i)
+						return true, nil
 					},
 				}
 			},

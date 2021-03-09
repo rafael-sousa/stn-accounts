@@ -18,9 +18,9 @@ import (
 )
 
 type server struct {
-	accountServ  *service.Account
-	transferServ *service.Transfer
-	middlewares  []func(http.Handler) http.Handler
+	accountSrv  *service.Account
+	transferSrv *service.Transfer
+	middlewares []func(http.Handler) http.Handler
 }
 
 // Server exposes the services provived by the application via REST
@@ -38,20 +38,20 @@ func (s *server) Use(m ...func(http.Handler) http.Handler) *server {
 // Start kicks off the service by registering the application routes and applying the configured middlewares
 func (s *server) Start(cfg *env.RestConfig) {
 
-	r := chi.NewRouter()
+	router := chi.NewRouter()
 	for _, md := range s.middlewares {
-		r.Use(md)
+		router.Use(md)
 	}
-	jwtH := jwt.NewHandler(cfg)
-	r.Route("/accounts", routing.Accounts(s.accountServ))
-	r.Route("/transfers", routing.Transfers(s.transferServ, jwtH))
-	r.Route("/login", routing.Login(s.accountServ, jwtH))
-	r.NotFound(routing.NotFound)
-	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("doc.json")))
+	jwtHandler := jwt.NewHandler(cfg)
+	router.Route("/accounts", routing.Accounts(s.accountSrv))
+	router.Route("/transfers", routing.Transfers(s.transferSrv, jwtHandler))
+	router.Route("/login", routing.Login(s.accountSrv, jwtHandler))
+	router.NotFound(routing.NotFound)
+	router.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("doc.json")))
 
-	var srv http.Server
-	srv.Addr = ":" + strconv.Itoa(cfg.Port)
-	srv.Handler = r
+	var httpServer http.Server
+	httpServer.Addr = ":" + strconv.Itoa(cfg.Port)
+	httpServer.Handler = router
 
 	waitShutdown := make(chan int)
 	go func() {
@@ -60,13 +60,13 @@ func (s *server) Start(cfg *env.RestConfig) {
 		<-sigint
 
 		log.Info().Msg("Interrupt signal received. Shutting down HTTP server")
-		if err := srv.Shutdown(context.Background()); err != nil {
+		if err := httpServer.Shutdown(context.Background()); err != nil {
 			log.Error().Msgf("HTTP server Shutdown: %v", err)
 		}
 		close(waitShutdown)
 	}()
 
-	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+	if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatal().Msgf("Failed to start and listen the http server at port %d, %v", cfg.Port, err)
 	}
 
@@ -74,9 +74,9 @@ func (s *server) Start(cfg *env.RestConfig) {
 }
 
 // NewServer constructs a server with its required dependencies
-func NewServer(accountServ *service.Account, transferServ *service.Transfer) Server {
+func NewServer(accountSrv *service.Account, transferSrv *service.Transfer) Server {
 	return &server{
-		accountServ:  accountServ,
-		transferServ: transferServ,
+		accountSrv:  accountSrv,
+		transferSrv: transferSrv,
 	}
 }

@@ -11,32 +11,31 @@ import (
 
 // Transfer keeps the validation for operations related to entity.Transfer
 type Transfer struct {
-	AccountRepo *repository.Account
+	AccountRepository *repository.Account
 }
 
 // Creation validates the creation of a new entity.Transfer
-func (v *Transfer) Creation(ctx context.Context, origin int64, d *dto.TransferCreation) error {
-	if d.Amount <= 0 {
+func (v *Transfer) Creation(ctx context.Context, origin int64, transferCreation *dto.TransferCreation) error {
+	if transferCreation.Amount <= 0 {
 		return greaterThanErr("amount", 0)
 	}
-	if d.Destination == 0 {
+	if transferCreation.Destination == 0 {
 		return requiredFieldErr("destination_id")
 	}
-	if d.Destination == origin {
+	if transferCreation.Destination == origin {
 		return sameFieldErr("origin id", "destination id")
 	}
-	oBalance, err := (*v.AccountRepo).GetBalance(ctx, origin)
+	originBalance, err := (*v.AccountRepository).GetBalance(ctx, origin)
 	if err != nil {
 		if customErr, ok := err.(*types.Err); ok && customErr.Code == types.EmptyResultErr {
 			return notFoundErr("origin", origin)
 		}
 		return err
 	}
-	b := int64(oBalance) - int64(d.Amount*100)
-	if b < 0 {
-		return types.NewErr(types.ValidationErr, fmt.Sprintf("the origin must have a balance greater than or equal to %.2f", d.Amount), nil)
+	if originBalance-types.NewCurrency(transferCreation.Amount) < 0 {
+		return types.NewErr(types.ValidationErr, fmt.Sprintf("the origin must have a balance greater than or equal to %.2f", transferCreation.Amount), nil)
 	}
-	exists, err := (*v.AccountRepo).Exists(ctx, d.Destination)
+	exists, err := (*v.AccountRepository).Exists(ctx, transferCreation.Destination)
 	if err != nil {
 		return err
 	} else if !exists {

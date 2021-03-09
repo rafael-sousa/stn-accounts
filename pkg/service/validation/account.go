@@ -12,82 +12,79 @@ import (
 
 // Account keeps the validation for operations related to entity.Account
 type Account struct {
-	AccountRepo *repository.Account
+	AccountRepository *repository.Account
 }
 
 // Creation validates the creation of a new entity.Account
-func (v *Account) Creation(ctx context.Context, d *dto.AccountCreation) (err error) {
-	if err = verifyName(&d.Name); err != nil {
-		return
+func (v *Account) Creation(ctx context.Context, accountCreation *dto.AccountCreation) error {
+	if err := verifyName(accountCreation.Name); err != nil {
+		return err
 	}
-	if err = verifyCPF(&d.CPF); err != nil {
-		return
+	if err := verifyCPF(accountCreation.CPF); err != nil {
+		return err
 	}
-	if err = verifySecret(&d.Secret); err != nil {
-		return
+	if err := verifySecret(accountCreation.Secret); err != nil {
+		return err
 	}
 
-	if acc, err := (*v.AccountRepo).FindBy(ctx, d.CPF); acc != nil && err == nil {
-		return uniqErr("cpf", d.CPF)
+	if account, err := (*v.AccountRepository).FindBy(ctx, accountCreation.CPF); account != nil && err == nil {
+		return uniqErr("cpf", accountCreation.CPF)
 	}
-	if d.Balance < 0 {
+	if accountCreation.Balance < 0 {
 		return greaterOrEqualErr("balance", 0)
 	}
-	return
+	return nil
 }
 
 // Login validates the creation of a new entity.Account
-func (v *Account) Login(cpf *string, secret *string) (err error) {
-	if err = verifyCPF(cpf); err != nil {
-		return
+func (v *Account) Login(cpf string, secret string) error {
+	if err := verifyCPF(cpf); err != nil {
+		return err
 	}
-	nLen := len(*secret)
-	if nLen == 0 {
+	if len(secret) == 0 {
 		return requiredFieldErr("secret")
 	}
-	return
+	return nil
 }
 
-func verifyName(v *string) error {
+func verifyName(name string) error {
 	fieldName := "name"
-	nLen := len(*v)
-	if nLen == 0 {
+	nameLength := len(name)
+	switch {
+	case nameLength == 0:
 		return requiredFieldErr(fieldName)
-	}
-	if nLen > entity.AccountNameSize {
+	case nameLength > entity.AccountNameSize:
 		return maxSizeErr(fieldName, entity.AccountNameSize)
-	}
-	if len(strings.TrimSpace(*v)) != nLen {
+	case len(strings.TrimSpace(name)) != nameLength:
 		return trailingWhiteSpaceErr(fieldName)
 	}
 	return nil
 }
 
-func verifyCPF(v *string) error {
+func verifyCPF(cpf string) error {
 	fieldName := "cpf"
-	nLen := len(*v)
-	if nLen == 0 {
+	cpfLength := len(cpf)
+	_, err := strconv.ParseUint(cpf, 10, 64)
+	switch {
+	case cpfLength == 0:
 		return requiredFieldErr(fieldName)
-	}
-	if nLen > entity.AccountCPFSize {
+	case cpfLength > entity.AccountCPFSize:
 		return maxSizeErr(fieldName, entity.AccountCPFSize)
-	}
-	if nLen < entity.AccountCPFSize {
+	case cpfLength < entity.AccountCPFSize:
 		return minSizeErr(fieldName, entity.AccountCPFSize)
-	}
-	if _, err := strconv.ParseUint(*v, 10, 64); err != nil {
+	case err != nil:
 		return invalidFormatErr(fieldName)
 	}
 	return nil
 }
 
-func verifySecret(v *string) error {
+func verifySecret(secret string) error {
 	fieldName := "secret"
-	nLen := len(*v)
-	if nLen == 0 {
+	nLen := len(secret)
+	switch {
+	case nLen == 0:
 		return requiredFieldErr(fieldName)
-	}
-	if nLen > entity.AccountSecretSize {
+	case nLen > entity.AccountSecretSize:
 		return maxSizeErr(fieldName, entity.AccountSecretSize)
 	}
 	return nil

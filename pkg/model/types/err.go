@@ -41,6 +41,7 @@ func (e *Err) MarshalZerologObject(evt *zerolog.Event) {
 
 }
 
+// Error formats a string that describes the custom error
 func (e *Err) Error() string {
 	if e.Cause == nil {
 		return fmt.Sprintf("%s: %s", e.Code, e.Msg)

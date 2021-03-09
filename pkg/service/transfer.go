@@ -19,16 +19,16 @@ type Transfer interface {
 }
 
 type transfer struct {
-	transferRepo *repository.Transfer
-	accountRepo  *repository.Account
-	txr          *repository.Transactioner
-	transferVali *validation.Transfer
+	transferRepository *repository.Transfer
+	accountRepository  *repository.Account
+	txr                *repository.Transactioner
+	transferValidator  *validation.Transfer
 }
 
 // Fetch returns a list of entity.Transfer from the entity.Account stored at id.
 // It returns nil and an error in when not able to fetch the rows from the repository
 func (s *transfer) Fetch(ctx context.Context, id int64) ([]*dto.TransferView, error) {
-	transfers, err := (*s.transferRepo).Fetch(ctx, id)
+	transfers, err := (*s.transferRepository).Fetch(ctx, id)
 	if err != nil {
 		log.Error().Caller().Err(err).Int64("id", id).Msg("unable to fetch transfers")
 		return nil, err
@@ -42,26 +42,29 @@ func (s *transfer) Fetch(ctx context.Context, id int64) ([]*dto.TransferView, er
 }
 
 // Create validates, create, and persists an entity.Transfer from the values stored at d
-func (s *transfer) Create(ctx context.Context, origin int64, d *dto.TransferCreation) (*dto.TransferView, error) {
-	var e *entity.Transfer
+func (s *transfer) Create(ctx context.Context, origin int64, transferCreation *dto.TransferCreation) (*dto.TransferView, error) {
+	var transfer *entity.Transfer
 	err := (*s.txr).WithTx(ctx, func(txCtx context.Context) error {
-		err := s.transferVali.Creation(txCtx, origin, d)
-		if err != nil {
+		if err := s.transferValidator.Creation(txCtx, origin, transferCreation); err != nil {
 			return err
 		}
-		originBalance, err := (*s.accountRepo).GetBalance(txCtx, origin)
+		originBalance, err := (*s.accountRepository).GetBalance(txCtx, origin)
 		if err != nil {
-			log.Info().Caller().Err(err).Int64("account_origin_id", origin).Msg("unable to get the origin account balance")
+			log.Info().Caller().Err(err).
+				Int64("account_origin_id", origin).
+				Msg("unable to get the origin account balance")
 			return err
 		}
-		destBalance, err := (*s.accountRepo).GetBalance(txCtx, d.Destination)
+		destinationBalance, err := (*s.accountRepository).GetBalance(txCtx, transferCreation.Destination)
 		if err != nil {
-			log.Info().Caller().Err(err).Int64("account_destination_id", d.Destination).Msg("unable to get the destination account balance")
+			log.Info().Caller().Err(err).
+				Int64("account_destination_id", transferCreation.Destination).
+				Msg("unable to get the destination account balance")
 			return err
 		}
-		amount := types.NewCurrency(d.Amount)
-		err = (*s.accountRepo).UpdateBalance(txCtx, origin, originBalance-amount)
-		if err != nil {
+		amount := types.NewCurrency(transferCreation.Amount)
+
+		if err = (*s.accountRepository).UpdateBalance(txCtx, origin, originBalance-amount); err != nil {
 			log.Info().Caller().Err(err).
 				Int64("account_origin_id", origin).
 				Int64("balance", int64(originBalance)).
@@ -69,20 +72,20 @@ func (s *transfer) Create(ctx context.Context, origin int64, d *dto.TransferCrea
 				Msg("unable to update the origin account balance")
 			return err
 		}
-		err = (*s.accountRepo).UpdateBalance(txCtx, d.Destination, destBalance+amount)
-		if err != nil {
+
+		if err = (*s.accountRepository).UpdateBalance(txCtx, transferCreation.Destination, destinationBalance+amount); err != nil {
 			log.Info().
 				Caller().
 				Err(err).
-				Int64("account_destination_id", d.Destination).
-				Int64("balance", int64(destBalance)).
+				Int64("account_destination_id", transferCreation.Destination).
+				Int64("balance", int64(destinationBalance)).
 				Int64("amount", int64(amount)).
 				Msg("unable to update the destination account balance")
 			return err
 		}
-		e, err = (*s.transferRepo).Create(txCtx, &entity.Transfer{
+		transfer, err = (*s.transferRepository).Create(txCtx, &entity.Transfer{
 			Origin:      origin,
-			Destination: d.Destination,
+			Destination: transferCreation.Destination,
 			Amount:      amount,
 			CreatedAt:   time.Now(),
 		})
@@ -94,22 +97,22 @@ func (s *transfer) Create(ctx context.Context, origin int64, d *dto.TransferCrea
 			Caller().
 			Err(err).
 			Int64("account_origin_id", origin).
-			Int64("account_destination_id", d.Destination).
-			Int64("amount", int64(d.Amount)).
+			Int64("account_destination_id", transferCreation.Destination).
+			Int64("amount", int64(transferCreation.Amount)).
 			Msg("unable to transfer the currency amount")
 		return nil, err
 	}
-	return dto.NewTransferView(e), nil
+	return dto.NewTransferView(transfer), nil
 }
 
 // NewTransfer returns a value responsible for managing entity.Transfer integrity
-func NewTransfer(txr *repository.Transactioner, transferRepo *repository.Transfer, accountRepo *repository.Account) Transfer {
+func NewTransfer(txr *repository.Transactioner, transferRepository *repository.Transfer, accountRepository *repository.Account) Transfer {
 	return &transfer{
-		transferRepo: transferRepo,
-		accountRepo:  accountRepo,
-		txr:          txr,
-		transferVali: &validation.Transfer{
-			AccountRepo: accountRepo,
+		transferRepository: transferRepository,
+		accountRepository:  accountRepository,
+		txr:                txr,
+		transferValidator: &validation.Transfer{
+			AccountRepository: accountRepository,
 		},
 	}
 }

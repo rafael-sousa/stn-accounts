@@ -9,9 +9,9 @@ const (
 )
 
 // AppendHeaders appends the rest default headers
-func AppendHeaders(hs http.Header) {
-	hs.Set("Content-Type", ApplicationJSON)
-	hs.Set("Accept", ApplicationJSON)
-	hs.Set("Accept-Charset", CharsetUTF8)
+func AppendHeaders(header http.Header) {
+	header.Set("Content-Type", ApplicationJSON)
+	header.Set("Accept", ApplicationJSON)
+	header.Set("Accept-Charset", CharsetUTF8)
 
 }

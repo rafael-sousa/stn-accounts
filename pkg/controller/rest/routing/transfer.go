@@ -14,8 +14,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type router struct {
-	transferServ *service.Transfer
+type transferHandler struct {
+	transferSrv *service.Transfer
 }
 
 // @ID get-transfer
@@ -29,13 +29,13 @@ type router struct {
 // @Failure 500 {object} body.JSONError
 // @Router /transfers [get]
 // @Security ApiKeyAuth
-func (h *router) get(w http.ResponseWriter, r *http.Request) {
+func (h *transferHandler) get(w http.ResponseWriter, r *http.Request) {
 	id, ok := r.Context().Value(middleware.CtxAccountID).(int64)
 	if !ok {
 		response.WriteErr(w, r, types.NewErr(types.InternalErr, "unable to get account id from request context", nil))
 		return
 	}
-	transfers, err := (*h.transferServ).Fetch(r.Context(), id)
+	transfers, err := (*h.transferSrv).Fetch(r.Context(), id)
 	if err != nil {
 		response.WriteErr(w, r, err)
 		return
@@ -59,36 +59,36 @@ func (h *router) get(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} body.JSONError
 // @Router /transfers [post]
 // @Security ApiKeyAuth
-func (h *router) post(w http.ResponseWriter, r *http.Request) {
+func (h *transferHandler) post(w http.ResponseWriter, r *http.Request) {
 	id, ok := r.Context().Value(middleware.CtxAccountID).(int64)
 	if !ok {
 		response.WriteErr(w, r, types.NewErr(types.InternalErr, "unable to get account id from request context", nil))
 		return
 	}
-	var d dto.TransferCreation
-	err := json.NewDecoder(r.Body).Decode(&d)
+	var transferCreation dto.TransferCreation
+	err := json.NewDecoder(r.Body).Decode(&transferCreation)
 	if err != nil {
 		log.Error().Caller().Err(err).Msg("unable to decode request body as transfer creation")
 		response.WriteErr(w, r, err)
 		return
 	}
 
-	t, err := (*h.transferServ).Create(r.Context(), id, &d)
+	view, err := (*h.transferSrv).Create(r.Context(), id, &transferCreation)
 	if err != nil {
 		response.WriteErr(w, r, err)
 		return
 	}
-	if err = response.WriteSuccess(w, r, t, t.ID); err != nil {
+	if err = response.WriteSuccess(w, r, view, view.ID); err != nil {
 		log.Error().Caller().Err(err).Msg("unable to encode transfer into response")
 		response.WriteErr(w, r, err)
 	}
 }
 
 // Transfers handles the requests related to entity.Transfer
-func Transfers(transferServ *service.Transfer, jwtH *jwt.Handler) func(chi.Router) {
-	h := router{transferServ: transferServ}
+func Transfers(transferSrv *service.Transfer, jwtHandler *jwt.Handler) func(chi.Router) {
+	h := transferHandler{transferSrv: transferSrv}
 	return func(r chi.Router) {
-		r.Use(middleware.NewAuthenticated(jwtH))
+		r.Use(middleware.NewAuthenticated(jwtHandler))
 		r.Get("/", h.get)
 		r.Post("/", h.post)
 	}

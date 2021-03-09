@@ -13,7 +13,7 @@ import (
 )
 
 type accountHandler struct {
-	accountServ *service.Account
+	accountSrv *service.Account
 }
 
 // @Summary Fetches a list of application accounts
@@ -24,13 +24,13 @@ type accountHandler struct {
 // @Success 200 {array} dto.AccountView
 // @Failure 500 {object} body.JSONError
 // @Router /accounts [get]
-func (h accountHandler) get(w http.ResponseWriter, r *http.Request) {
-	accs, err := (*h.accountServ).Fetch(r.Context())
+func (h *accountHandler) get(w http.ResponseWriter, r *http.Request) {
+	accounts, err := (*h.accountSrv).Fetch(r.Context())
 	if err != nil {
 		response.WriteErr(w, r, err)
 		return
 	}
-	if err = response.WriteSuccess(w, r, accs, nil); err != nil {
+	if err = response.WriteSuccess(w, r, accounts, nil); err != nil {
 		log.Error().Caller().Err(err).Msg("unable to encode the accounts into the response")
 		response.WriteErr(w, r, err)
 	}
@@ -54,12 +54,12 @@ func (h *accountHandler) getBalance(w http.ResponseWriter, r *http.Request) {
 		response.WriteErr(w, r, err)
 		return
 	}
-	b, err := (*h.accountServ).GetBalance(r.Context(), id)
+	balance, err := (*h.accountSrv).GetBalance(r.Context(), id)
 	if err != nil {
 		response.WriteErr(w, r, err)
 		return
 	}
-	if err = response.WriteSuccess(w, r, b, nil); err != nil {
+	if err = response.WriteSuccess(w, r, balance, nil); err != nil {
 		log.Error().Caller().Err(err).Msg("unable to encode the account balance into the response")
 		response.WriteErr(w, r, err)
 	}
@@ -85,20 +85,20 @@ func (h *accountHandler) post(w http.ResponseWriter, r *http.Request) {
 		response.WriteErr(w, r, nil)
 		return
 	}
-	e, err := (*h.accountServ).Create(r.Context(), &d)
+	view, err := (*h.accountSrv).Create(r.Context(), &d)
 	if err != nil {
 		response.WriteErr(w, r, err)
 		return
 	}
-	if err = response.WriteSuccess(w, r, e, e.ID); err != nil {
+	if err = response.WriteSuccess(w, r, view, view.ID); err != nil {
 		log.Error().Caller().Err(err).Msg("unable to encode the new account into the response")
 		response.WriteErr(w, r, err)
 	}
 }
 
 // Accounts handle the requests related to entity.Account
-func Accounts(accountServ *service.Account) func(chi.Router) {
-	h := accountHandler{accountServ: accountServ}
+func Accounts(accountSrv *service.Account) func(chi.Router) {
+	h := accountHandler{accountSrv: accountSrv}
 	return func(r chi.Router) {
 		r.Get("/", h.get)
 		r.Post("/", h.post)

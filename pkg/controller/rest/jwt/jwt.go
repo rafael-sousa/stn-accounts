@@ -18,20 +18,20 @@ type Handler struct {
 
 // Generate creates a new JWT token with the given id
 func (h *Handler) Generate(id int64) (string, *jwtgo.StandardClaims, error) {
-	c := jwtgo.StandardClaims{
+	claims := jwtgo.StandardClaims{
 		ExpiresAt: time.Now().Add(h.expTimeout * time.Minute).Unix(),
 		IssuedAt:  time.Now().Unix(),
 		Issuer:    strconv.FormatInt(id, 10),
 	}
-	token := jwtgo.NewWithClaims(jwtgo.SigningMethodHS256, &c)
-	tokenStr, err := token.SignedString(h.secret)
-	return tokenStr, &c, err
+	token := jwtgo.NewWithClaims(jwtgo.SigningMethodHS256, &claims)
+	signedString, err := token.SignedString(h.secret)
+	return signedString, &claims, err
 }
 
 // Parse receives a token string, parses it, validates its content, and returns a token claims
-func (h *Handler) Parse(tokenHeader string) (*jwtgo.StandardClaims, error) {
-	c := &jwtgo.StandardClaims{}
-	token, err := jwtgo.ParseWithClaims(tokenHeader, c, func(token *jwtgo.Token) (interface{}, error) {
+func (h *Handler) Parse(tokenString string) (*jwtgo.StandardClaims, error) {
+	claims := &jwtgo.StandardClaims{}
+	token, err := jwtgo.ParseWithClaims(tokenString, claims, func(token *jwtgo.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwtgo.SigningMethodHMAC); !ok {
 			return nil, types.NewErr(types.AuthenticationErr, "invalid jwt token signature", nil)
 		}
@@ -51,15 +51,15 @@ func (h *Handler) Parse(tokenHeader string) (*jwtgo.StandardClaims, error) {
 		return nil, err
 	}
 	if token.Valid {
-		return c, nil
+		return claims, nil
 	}
 	return nil, types.NewErr(types.AuthenticationErr, "unexpected token format", nil)
 }
 
 // NewHandler creates a new JWT Handler
-func NewHandler(c *env.RestConfig) *Handler {
+func NewHandler(config *env.RestConfig) *Handler {
 	return &Handler{
-		secret:     c.Secret,
-		expTimeout: time.Duration(c.TokenExpTimeout),
+		secret:     config.Secret,
+		expTimeout: time.Duration(config.TokenExpTimeout),
 	}
 }

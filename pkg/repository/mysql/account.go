@@ -24,14 +24,14 @@ func (r *account) Fetch(ctx context.Context) ([]*entity.Account, error) {
 	defer rows.Close()
 	accs := make([]*entity.Account, 0)
 	for rows.Next() {
-		e := entity.Account{}
-		if err = rows.Scan(&e.ID, &e.Name, &e.CPF, &e.Secret, &e.Balance, &e.CreatedAt); err != nil {
+		acc := entity.Account{}
+		if err = rows.Scan(&acc.ID, &acc.Name, &acc.CPF, &acc.Secret, &acc.Balance, &acc.CreatedAt); err != nil {
 			return nil, types.NewErr(types.SelectStmtErr, "scanning account row", &err)
 		}
-		accs = append(accs, &e)
+		accs = append(accs, &acc)
 	}
-	err = rows.Err()
-	if err != nil {
+
+	if err = rows.Err(); err != nil {
 		return nil, types.NewErr(types.SelectStmtErr, "iterating over the account rows", &err)
 	}
 	return accs, nil
@@ -47,8 +47,7 @@ func (r *account) Create(ctx context.Context, e *entity.Account) (*entity.Accoun
 	if err != nil {
 		return nil, types.NewErr(types.InsertStmtErr, "exec account insert stmt", &err)
 	}
-	e.ID, err = result.LastInsertId()
-	if err != nil {
+	if e.ID, err = result.LastInsertId(); err != nil {
 		return nil, types.NewErr(types.InsertStmtErr, "getting the inserted account id", &err)
 	}
 	return e, nil
@@ -66,25 +65,25 @@ func (r *account) GetBalance(ctx context.Context, id int64) (types.Currency, err
 }
 
 func (r *account) FindBy(ctx context.Context, cpf string) (*entity.Account, error) {
-	var e entity.Account
+	var acc entity.Account
 	q := "SELECT id, name, cpf, secret, balance, created_at FROM account WHERE cpf=?"
-	err := (*r.txr).GetConn(ctx).QueryRowContext(ctx, q, cpf).Scan(&e.ID, &e.Name, &e.CPF, &e.Secret, &e.Balance, &e.CreatedAt)
+	err := (*r.txr).GetConn(ctx).QueryRowContext(ctx, q, cpf).Scan(&acc.ID, &acc.Name, &acc.CPF, &acc.Secret, &acc.Balance, &acc.CreatedAt)
 	if err == sql.ErrNoRows {
 		return nil, types.NewErr(types.EmptyResultErr, "no result finding account by cpf", &err)
 	}
 	if err != nil {
 		return nil, types.NewErr(types.SelectStmtErr, "finding account by cpf", &err)
 	}
-	return &e, nil
+	return &acc, nil
 }
 
-func (r *account) UpdateBalance(ctx context.Context, id int64, b types.Currency) error {
+func (r *account) UpdateBalance(ctx context.Context, id int64, balance types.Currency) error {
 	stmt, err := (*r.txr).GetConn(ctx).PrepareContext(ctx, "UPDATE account SET balance=? WHERE id=?")
 	if err != nil {
 		return types.NewErr(types.UpdateStmtErr, "preparing update account balance stmt", &err)
 	}
 	defer stmt.Close()
-	result, err := stmt.ExecContext(ctx, b, id)
+	result, err := stmt.ExecContext(ctx, balance, id)
 	if err != nil {
 		return types.NewErr(types.UpdateStmtErr, "exec the update account balance stmt", &err)
 	}

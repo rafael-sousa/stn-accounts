@@ -19,25 +19,25 @@ type transactioner struct {
 
 // Transactioner handles operations that store transactions in contexts and run functions within a transactional concept
 type Transactioner interface {
-	WithTx(ctx context.Context, f func(context.Context) error) (err error)
+	WithTx(ctx context.Context, fn func(context.Context) error) (err error)
 	GetConn(ctx context.Context) Connection
 }
 
 // WithTx starts a db transaction and stores it on the specified context.
-// It runs the function stored at f with the transactional context.
+// It runs the function stored at fn with the transactional context.
 // If f function yields no error, the transaction is committed otherwise is rolled back
-func (manager *transactioner) WithTx(ctx context.Context, f func(context.Context) error) (err error) {
+func (txr *transactioner) WithTx(ctx context.Context, fn func(context.Context) error) (err error) {
 	ctxTx := ctx.Value(CtxTxKey)
 
 	if ctxTx == nil {
-		ctxTx, err = manager.db.BeginTx(ctx, nil)
+		ctxTx, err = txr.db.BeginTx(ctx, nil)
 		if err != nil {
 			return types.NewErr(types.InternalErr, "unable to begin tx", &err)
 		}
 		ctx = context.WithValue(ctx, CtxTxKey, ctxTx)
 	}
 
-	err = f(ctx)
+	err = fn(ctx)
 
 	if tx, ok := ctxTx.(*sql.Tx); ok {
 		if err == nil {
@@ -51,11 +51,11 @@ func (manager *transactioner) WithTx(ctx context.Context, f func(context.Context
 }
 
 // GetConn returns a connection to the current database pool
-func (manager *transactioner) GetConn(ctx context.Context) Connection {
-	if k, ok := ctx.Value(CtxTxKey).(Connection); ok {
-		return k
+func (txr *transactioner) GetConn(ctx context.Context) Connection {
+	if conn, ok := ctx.Value(CtxTxKey).(Connection); ok {
+		return conn
 	}
-	return manager.db
+	return txr.db
 }
 
 // NewTxr creates a new Transactioner value

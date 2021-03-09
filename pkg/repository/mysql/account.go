@@ -101,7 +101,7 @@ func (r *account) Exists(ctx context.Context, id int64) (bool, error) {
 	var exists bool
 	err := (*r.txr).GetConn(ctx).QueryRowContext(ctx, "SELECT EXISTS(SELECT id FROM account WHERE id=?)", id).Scan(&exists)
 	if err != nil && err != sql.ErrNoRows {
-		return exists, types.NewErr(types.SelectStmtErr, "verifying account existance", &err)
+		return exists, types.NewErr(types.SelectStmtErr, "verifying account existence", &err)
 	}
 	return exists, nil
 }

@@ -25,20 +25,22 @@ func TestTransferRepositoryFetch(t *testing.T) {
 				t.Cleanup(dbWipe)
 
 				result, err := db.Exec("INSERT INTO account(name,cpf,secret,balance,created_at) VALUES ('John','99999999999','pw',100,'2100-12-31')")
-				logFatal(err, "unable to prepare testcase")
+				logFatal(err, "unable to prepare insert stmt")
 
 				origin, err := result.LastInsertId()
 				logFatal(err, "unable to retrieve inserted id")
 
 				result, err = db.Exec("INSERT INTO account(name,cpf,secret,balance,created_at) VALUES ('Doe','88888888888','pw',500,'2100-12-31')")
-				logFatal(err, "unable to prepare testcase")
+				logFatal(err, "unable to exec insert stmt")
 
 				destination, err := result.LastInsertId()
 				logFatal(err, "unable to retrieve inserted id")
 
 				stmt, err := db.Prepare("INSERT INTO transfer(account_origin_id, account_destination_id, amount, created_at) VALUES (?,?,?,?)")
-				logFatal(err, "unable to prepare testcase")
+				logFatal(err, "unable to prepare insert stmt")
+
 				result, err = stmt.Exec(origin, destination, 500, time.Now())
+				logFatal(err, "unable to exec insert stmt")
 
 				id, err := result.LastInsertId()
 				logFatal(err, "unable to retrieve inserted id")

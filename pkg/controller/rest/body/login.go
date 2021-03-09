@@ -6,7 +6,7 @@ type LoginRequest struct {
 	Secret string `json:"secret" validation:"required" minLength:"1" maxLength:"50"`
 }
 
-// LoginResponse maintains the response body of a successfull login
+// LoginResponse maintains the response body of a successful login
 type LoginResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`

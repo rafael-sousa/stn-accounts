@@ -313,7 +313,7 @@ func TestAccountRepositoryExists(t *testing.T) {
 			tc.prepare(t, tc.input)
 			if exists, err := repo.Exists(context.Background(), tc.input.ID); err == nil {
 				if exists != tc.expected {
-					t.Errorf("expected account existance equal to '%v' but got '%v'", tc.expected, exists)
+					t.Errorf("expected account existence equal to '%v' but got '%v'", tc.expected, exists)
 				}
 			} else {
 				t.Error(err)

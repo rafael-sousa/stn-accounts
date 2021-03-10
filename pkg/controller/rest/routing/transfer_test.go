@@ -19,12 +19,11 @@ import (
 func TestRoutingTransferFetch(t *testing.T) {
 	token, _, _ := jwtHandler.Generate(1)
 	tt := []struct {
-		name      string
-		service   func() service.Transfer
-		status    int
-		path      string
-		headers   map[string]string
-		assertRes func(*testing.T, *httptest.ResponseRecorder)
+		name    string
+		service func() service.Transfer
+		status  int
+		path    string
+		headers map[string]string
 	}{
 		{
 			name:   "get '/' without auth header",

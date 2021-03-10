@@ -20,9 +20,9 @@ func TestAccountRepositoryFetch(t *testing.T) {
 		{
 			name: "fetch accounts with data",
 			input: []*entity.Account{
-				testutil.NewAccount(0, "Joe", "00000000000", "S001", 1),
-				testutil.NewAccount(0, "John", "00000000001", "S002", 2),
-				testutil.NewAccount(0, "Suz", "00000000002", "S003", 3),
+				testutil.NewEntityAccount(0, "Joe", "00000000000", "S001", 1),
+				testutil.NewEntityAccount(0, "John", "00000000001", "S002", 2),
+				testutil.NewEntityAccount(0, "Suz", "00000000002", "S003", 3),
 			},
 		},
 		{
@@ -62,10 +62,10 @@ func TestAccountRepositoryCreate(t *testing.T) {
 		{
 			name: "create account with valid input",
 			input: []*entity.Account{
-				testutil.NewAccount(0, "John", "33333333331", "S300", 300),
-				testutil.NewAccount(0, "Jose", "33333333332", "S301", 301),
-				testutil.NewAccount(0, "Silva", "33333333333", "S302", 302),
-				testutil.NewAccount(0, "Sousa", "33333333334", "S303", 303),
+				testutil.NewEntityAccount(0, "John", "33333333331", "S300", 300),
+				testutil.NewEntityAccount(0, "Jose", "33333333332", "S301", 301),
+				testutil.NewEntityAccount(0, "Silva", "33333333333", "S302", 302),
+				testutil.NewEntityAccount(0, "Sousa", "33333333334", "S303", 303),
 			},
 		},
 	}
@@ -103,7 +103,7 @@ func TestAccountRepositoryGetBalance(t *testing.T) {
 	}{
 		{
 			name:  "get balance from existing account",
-			input: testutil.NewAccount(0, "Peter", "44444444441", "S400", 400),
+			input: testutil.NewEntityAccount(0, "Peter", "44444444441", "S400", 400),
 			prepare: func(t *testing.T, e *entity.Account) {
 				persistTestAccountEntity(t, []*entity.Account{e})
 			},
@@ -113,7 +113,7 @@ func TestAccountRepositoryGetBalance(t *testing.T) {
 		},
 		{
 			name:    "get balance from nonexisting account",
-			input:   testutil.NewAccount(0, "Bob", "44444444442", "S401", 401),
+			input:   testutil.NewEntityAccount(0, "Bob", "44444444442", "S401", 401),
 			prepare: func(t *testing.T, e *entity.Account) {},
 			assert: func(t *testing.T, err error) {
 				testutil.AssertCustomErr(t, types.EmptyResultErr, err, "no result getting the account balance")
@@ -145,7 +145,7 @@ func TestAccountRepositoryFindBy(t *testing.T) {
 	}{
 		{
 			name:  "find by cpf with existing account",
-			input: testutil.NewAccount(0, "Maria", "55555555551", "S500", 500),
+			input: testutil.NewEntityAccount(0, "Maria", "55555555551", "S500", 500),
 			prepare: func(t *testing.T, e *entity.Account) {
 				persistTestAccountEntity(t, []*entity.Account{e})
 			},
@@ -155,7 +155,7 @@ func TestAccountRepositoryFindBy(t *testing.T) {
 		},
 		{
 			name:    "find by cpf with nonexisting account",
-			input:   testutil.NewAccount(0, "Helena", "55555555552", "S501", 501),
+			input:   testutil.NewEntityAccount(0, "Helena", "55555555552", "S501", 501),
 			prepare: func(t *testing.T, e *entity.Account) {},
 			assert: func(t *testing.T, err error) {
 				testutil.AssertCustomErr(t, types.EmptyResultErr, err, "no result finding account by cpf")
@@ -195,7 +195,7 @@ func TestAccountRepositoryUpdateBalance(t *testing.T) {
 	}{
 		{
 			name:  "update balance from existing account",
-			input: testutil.NewAccount(0, "Izzy", "66666666661", "S600", 600),
+			input: testutil.NewEntityAccount(0, "Izzy", "66666666661", "S600", 600),
 			prepare: func(t *testing.T, e *entity.Account) {
 				persistTestAccountEntity(t, []*entity.Account{e})
 			},
@@ -206,7 +206,7 @@ func TestAccountRepositoryUpdateBalance(t *testing.T) {
 		},
 		{
 			name:    "update balance from nonexisting account",
-			input:   testutil.NewAccount(0, "Suzy", "66666666662", "S602", 602),
+			input:   testutil.NewEntityAccount(0, "Suzy", "66666666662", "S602", 602),
 			prepare: func(t *testing.T, e *entity.Account) {},
 			assert: func(t *testing.T, err error) {
 				testutil.AssertCustomErr(t, types.NoRowAffectedErr, err, "no rows affected by the update balance stmt")
@@ -244,7 +244,7 @@ func TestAccountRepositoryExists(t *testing.T) {
 	}{
 		{
 			name:  "existing account",
-			input: testutil.NewAccount(0, "William", "77777777771", "S701", 701),
+			input: testutil.NewEntityAccount(0, "William", "77777777771", "S701", 701),
 			prepare: func(t *testing.T, e *entity.Account) {
 				persistTestAccountEntity(t, []*entity.Account{e})
 			},
@@ -252,7 +252,7 @@ func TestAccountRepositoryExists(t *testing.T) {
 		},
 		{
 			name:    "nonexisting account",
-			input:   testutil.NewAccount(0, "James", "77777777771", "S702", 702),
+			input:   testutil.NewEntityAccount(0, "James", "77777777771", "S702", 702),
 			prepare: func(t *testing.T, e *entity.Account) {},
 		},
 	}

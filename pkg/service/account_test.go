@@ -9,6 +9,7 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 	"github.com/rafael-sousa/stn-accounts/pkg/repository"
 	"github.com/rafael-sousa/stn-accounts/pkg/service"
+	"github.com/rafael-sousa/stn-accounts/pkg/testutil"
 )
 
 func TestAccountServiceCreate(t *testing.T) {
@@ -21,48 +22,47 @@ func TestAccountServiceCreate(t *testing.T) {
 		{
 			name: "create account successfully",
 			repo: func(d *dto.AccountCreation) repository.Account {
-				return &accountRepoMock{
-					findBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
-						assertEq(t, "cpf", d.CPF, cpf)
+				return &testutil.AccountRepoMock{
+					ExpectFindBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
+						testutil.AssertEq(t, "cpf", d.CPF, cpf)
 						return nil, nil
 					},
-					create: func(ctx context.Context, e *entity.Account) (*entity.Account, error) {
-						assertEq(t, "name", d.Name, e.Name)
-						assertEq(t, "balance", d.Balance, e.Balance.Float64())
-						assertEq(t, "cpf", d.CPF, e.CPF)
+					ExpectCreate: func(ctx context.Context, e *entity.Account) (*entity.Account, error) {
+						testutil.AssertEq(t, "name", d.Name, e.Name)
+						testutil.AssertEq(t, "balance", d.Balance, e.Balance.Float64())
+						testutil.AssertEq(t, "cpf", d.CPF, e.CPF)
 						e.ID = 1
 						return e, nil
 					},
 				}
 			},
-			d: newAccountCreation("John", "00000000000", "pw", 100),
+			d: testutil.NewAccountCreation("John", "00000000000", "pw", 100),
 		},
 		{
 			name: "create account with validation err",
 			repo: func(d *dto.AccountCreation) repository.Account {
-				return &accountRepoMock{}
+				return &testutil.AccountRepoMock{}
 			},
 			d: &dto.AccountCreation{},
 			assertErr: func(t *testing.T, err error) {
-				assertCustomErr(t, types.ValidationErr, err, "field 'name' is required")
-
+				testutil.AssertCustomErr(t, types.ValidationErr, err, "field 'name' is required")
 			},
 		},
 		{
 			name: "create account with repository error",
 			repo: func(d *dto.AccountCreation) repository.Account {
-				return &accountRepoMock{
-					findBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
+				return &testutil.AccountRepoMock{
+					ExpectFindBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
 						return nil, nil
 					},
-					create: func(ctx context.Context, e *entity.Account) (*entity.Account, error) {
+					ExpectCreate: func(ctx context.Context, e *entity.Account) (*entity.Account, error) {
 						return nil, types.NewErr(types.InternalErr, "internal error", nil)
 					},
 				}
 			},
-			d: newAccountCreation("Doe", "98765432100", "l", 0),
+			d: testutil.NewAccountCreation("Doe", "98765432100", "l", 0),
 			assertErr: func(t *testing.T, err error) {
-				assertCustomErr(t, types.InternalErr, err, "internal error")
+				testutil.AssertCustomErr(t, types.InternalErr, err, "internal error")
 			},
 		},
 	}
@@ -73,11 +73,11 @@ func TestAccountServiceCreate(t *testing.T) {
 			s := service.NewAccount(&txr, &repo)
 			acc, err := s.Create(context.Background(), tc.d)
 			if err == nil && tc.assertErr == nil {
-				assertNotDefault(t, "id", acc.ID)
-				assertEq(t, "name", tc.d.Name, acc.Name)
-				assertEq(t, "balance", tc.d.Balance, acc.Balance)
-				assertEq(t, "cpf", tc.d.CPF, acc.CPF)
-				assertNotDefault(t, "created_at", acc.CreatedAt)
+				testutil.AssertNotDefault(t, "id", acc.ID)
+				testutil.AssertEq(t, "name", tc.d.Name, acc.Name)
+				testutil.AssertEq(t, "balance", tc.d.Balance, acc.Balance)
+				testutil.AssertEq(t, "cpf", tc.d.CPF, acc.CPF)
+				testutil.AssertNotDefault(t, "created_at", acc.CreatedAt)
 				return
 			}
 			tc.assertErr(t, err)
@@ -96,8 +96,8 @@ func TestAccountServiceFetch(t *testing.T) {
 			name:         "fetch account with no result",
 			expectedSize: 0,
 			repo: func() repository.Account {
-				return &accountRepoMock{
-					fetch: func(ctx context.Context) ([]*entity.Account, error) {
+				return &testutil.AccountRepoMock{
+					ExpectFetch: func(ctx context.Context) ([]*entity.Account, error) {
 						return []*entity.Account{}, nil
 					},
 				}
@@ -107,12 +107,12 @@ func TestAccountServiceFetch(t *testing.T) {
 			name:         "fetch account with results",
 			expectedSize: 3,
 			repo: func() repository.Account {
-				return &accountRepoMock{
-					fetch: func(ctx context.Context) ([]*entity.Account, error) {
+				return &testutil.AccountRepoMock{
+					ExpectFetch: func(ctx context.Context) ([]*entity.Account, error) {
 						return []*entity.Account{
-							newAccount(1, "Jose", "00123456789", "PW001", 100),
-							newAccount(2, "Maria", "98765432100", "PW002", 200),
-							newAccount(3, "Silva", "98745632100", "PW003", 300),
+							testutil.NewEntityAccount(1, "Jose", "00123456789", "PW001", 100),
+							testutil.NewEntityAccount(2, "Maria", "98765432100", "PW002", 200),
+							testutil.NewEntityAccount(3, "Silva", "98745632100", "PW003", 300),
 						}, nil
 					},
 				}
@@ -121,14 +121,14 @@ func TestAccountServiceFetch(t *testing.T) {
 		{
 			name: "fetch account repository error",
 			repo: func() repository.Account {
-				return &accountRepoMock{
-					fetch: func(ctx context.Context) ([]*entity.Account, error) {
+				return &testutil.AccountRepoMock{
+					ExpectFetch: func(ctx context.Context) ([]*entity.Account, error) {
 						return nil, types.NewErr(types.InternalErr, "internal error", nil)
 					},
 				}
 			},
 			assertErr: func(t *testing.T, err error) {
-				assertCustomErr(t, types.InternalErr, err, "internal error")
+				testutil.AssertCustomErr(t, types.InternalErr, err, "internal error")
 			},
 		},
 	}
@@ -139,12 +139,12 @@ func TestAccountServiceFetch(t *testing.T) {
 			s := service.NewAccount(&txr, &repo)
 			accs, err := s.Fetch(context.Background())
 			if err == nil && tc.assertErr == nil {
-				assertEq(t, "accs size", len(accs), tc.expectedSize)
+				testutil.AssertEq(t, "accs size", len(accs), tc.expectedSize)
 				for _, acc := range accs {
-					assertNotDefault(t, "name", acc.Name)
-					assertNotDefault(t, "cpf", acc.CPF)
-					assertNotDefault(t, "balance", acc.Balance)
-					assertNotDefault(t, "created_at", acc.CreatedAt)
+					testutil.AssertNotDefault(t, "name", acc.Name)
+					testutil.AssertNotDefault(t, "cpf", acc.CPF)
+					testutil.AssertNotDefault(t, "balance", acc.Balance)
+					testutil.AssertNotDefault(t, "created_at", acc.CreatedAt)
 				}
 			} else {
 				tc.assertErr(t, err)
@@ -164,9 +164,9 @@ func TestAccountServiceGetBalance(t *testing.T) {
 		{
 			name: "get account balance successfully",
 			repo: func(id int64, balance float64) repository.Account {
-				return &accountRepoMock{
-					getBalance: func(ctx context.Context, currentID int64) (types.Currency, error) {
-						assertEq(t, "id", id, currentID)
+				return &testutil.AccountRepoMock{
+					ExpectGetBalance: func(ctx context.Context, currentID int64) (types.Currency, error) {
+						testutil.AssertEq(t, "id", id, currentID)
 						return types.NewCurrency(balance), nil
 					},
 				}
@@ -177,8 +177,8 @@ func TestAccountServiceGetBalance(t *testing.T) {
 		{
 			name: "get account balance with repository error",
 			repo: func(id int64, balance float64) repository.Account {
-				return &accountRepoMock{
-					getBalance: func(ctx context.Context, currentID int64) (types.Currency, error) {
+				return &testutil.AccountRepoMock{
+					ExpectGetBalance: func(ctx context.Context, currentID int64) (types.Currency, error) {
 						return types.NewCurrency(0), types.NewErr(types.EmptyResultErr, "no sql rows", nil)
 					},
 				}
@@ -186,7 +186,7 @@ func TestAccountServiceGetBalance(t *testing.T) {
 			expected: 0,
 			id:       2,
 			assertErr: func(t *testing.T, err error) {
-				assertCustomErr(t, types.EmptyResultErr, err, "no sql rows")
+				testutil.AssertCustomErr(t, types.EmptyResultErr, err, "no sql rows")
 			},
 		},
 	}
@@ -196,7 +196,7 @@ func TestAccountServiceGetBalance(t *testing.T) {
 			repo := tc.repo(tc.id, tc.expected)
 			s := service.NewAccount(&txr, &repo)
 			balance, err := s.GetBalance(context.Background(), tc.id)
-			assertEq(t, "balance", tc.expected, balance)
+			testutil.AssertEq(t, "balance", tc.expected, balance)
 			if err != nil {
 				tc.assertErr(t, err)
 			}
@@ -215,13 +215,13 @@ func TestAccountServiceLogin(t *testing.T) {
 	}{
 		{
 			name:     "login with cpf and secret successfully",
-			expected: newAccount(1, "Sousa", "11111111111", "$2a$10$c3GzxvPAAMS9pDqB9XIYi.kT/PN7CxfRev.BsRLvAJqVcZnFiW05i", 0),
+			expected: testutil.NewEntityAccount(1, "Sousa", "11111111111", "$2a$10$c3GzxvPAAMS9pDqB9XIYi.kT/PN7CxfRev.BsRLvAJqVcZnFiW05i", 0),
 			secret:   "...",
 			cpf:      "11111111111",
 			repo: func(exp *entity.Account) repository.Account {
-				return &accountRepoMock{
-					findBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
-						assertEq(t, "cpf", exp.CPF, cpf)
+				return &testutil.AccountRepoMock{
+					ExpectFindBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
+						testutil.AssertEq(t, "cpf", exp.CPF, cpf)
 						return exp, nil
 					},
 				}
@@ -229,18 +229,18 @@ func TestAccountServiceLogin(t *testing.T) {
 		},
 		{
 			name:     "login with cpf and wrong secret",
-			expected: newAccount(2, "Alice", "22222222222", "123", 10),
+			expected: testutil.NewEntityAccount(2, "Alice", "22222222222", "123", 10),
 			secret:   "123",
 			cpf:      "22222222222",
 			repo: func(exp *entity.Account) repository.Account {
-				return &accountRepoMock{
-					findBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
+				return &testutil.AccountRepoMock{
+					ExpectFindBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
 						return exp, nil
 					},
 				}
 			},
 			assertErr: func(t *testing.T, err error) {
-				assertCustomErr(t, types.AuthenticationErr, err, "the provided secret doesn't match the account's secret")
+				testutil.AssertCustomErr(t, types.AuthenticationErr, err, "the provided secret doesn't match the account's secret")
 			},
 		},
 		{
@@ -248,14 +248,14 @@ func TestAccountServiceLogin(t *testing.T) {
 			secret: "...",
 			cpf:    "33333333333",
 			repo: func(exp *entity.Account) repository.Account {
-				return &accountRepoMock{
-					findBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
+				return &testutil.AccountRepoMock{
+					ExpectFindBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
 						return exp, types.NewErr(types.InternalErr, "internal error", nil)
 					},
 				}
 			},
 			assertErr: func(t *testing.T, err error) {
-				assertCustomErr(t, types.InternalErr, err, "internal error")
+				testutil.AssertCustomErr(t, types.InternalErr, err, "internal error")
 			},
 		},
 		{
@@ -263,34 +263,34 @@ func TestAccountServiceLogin(t *testing.T) {
 			secret: "...",
 			cpf:    "44444444444",
 			repo: func(exp *entity.Account) repository.Account {
-				return &accountRepoMock{
-					findBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
+				return &testutil.AccountRepoMock{
+					ExpectFindBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
 						return exp, types.NewErr(types.EmptyResultErr, "no result", nil)
 					},
 				}
 			},
 			assertErr: func(t *testing.T, err error) {
-				assertCustomErr(t, types.AuthenticationErr, err, "account with the given cpf does not exist")
+				testutil.AssertCustomErr(t, types.AuthenticationErr, err, "account with the given cpf does not exist")
 			},
 		},
 		{
 			name:   "login without cpf",
 			secret: "...",
 			repo: func(exp *entity.Account) repository.Account {
-				return &accountRepoMock{}
+				return &testutil.AccountRepoMock{}
 			},
 			assertErr: func(t *testing.T, err error) {
-				assertCustomErr(t, types.ValidationErr, err, "field 'cpf' is required")
+				testutil.AssertCustomErr(t, types.ValidationErr, err, "field 'cpf' is required")
 			},
 		},
 		{
 			name: "login without secret",
 			cpf:  "55555555555",
 			repo: func(exp *entity.Account) repository.Account {
-				return &accountRepoMock{}
+				return &testutil.AccountRepoMock{}
 			},
 			assertErr: func(t *testing.T, err error) {
-				assertCustomErr(t, types.ValidationErr, err, "field 'secret' is required")
+				testutil.AssertCustomErr(t, types.ValidationErr, err, "field 'secret' is required")
 			},
 		},
 	}
@@ -303,11 +303,11 @@ func TestAccountServiceLogin(t *testing.T) {
 			if err != nil {
 				tc.assertErr(t, err)
 			} else {
-				assertEq(t, "id", tc.expected.ID, view.ID)
-				assertEq(t, "name", tc.expected.Name, view.Name)
-				assertEq(t, "cpf", tc.expected.CPF, view.CPF)
-				assertEq(t, "balance", tc.expected.Balance.Float64(), view.Balance)
-				assertNotDefault(t, "created_at", view.CreatedAt)
+				testutil.AssertEq(t, "id", tc.expected.ID, view.ID)
+				testutil.AssertEq(t, "name", tc.expected.Name, view.Name)
+				testutil.AssertEq(t, "cpf", tc.expected.CPF, view.CPF)
+				testutil.AssertEq(t, "balance", tc.expected.Balance.Float64(), view.Balance)
+				testutil.AssertNotDefault(t, "created_at", view.CreatedAt)
 			}
 		})
 	}

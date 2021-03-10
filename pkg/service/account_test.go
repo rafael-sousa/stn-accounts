@@ -36,7 +36,8 @@ func TestAccountServiceCreate(t *testing.T) {
 					},
 				}
 			},
-			d: testutil.NewAccountCreation("John", "00000000000", "pw", 100),
+			d:         testutil.NewAccountCreation("John", "00000000000", "pw", 100),
+			assertErr: testutil.AssertNoErr,
 		},
 		{
 			name: "create account with validation err",
@@ -171,8 +172,9 @@ func TestAccountServiceGetBalance(t *testing.T) {
 					},
 				}
 			},
-			expected: 500,
-			id:       1,
+			expected:  500,
+			id:        1,
+			assertErr: testutil.AssertNoErr,
 		},
 		{
 			name: "get account balance with repository error",
@@ -226,6 +228,7 @@ func TestAccountServiceLogin(t *testing.T) {
 					},
 				}
 			},
+			assertErr: testutil.AssertNoErr,
 		},
 		{
 			name:     "login with cpf and wrong secret",

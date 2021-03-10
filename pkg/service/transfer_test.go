@@ -154,6 +154,7 @@ func TestTransferServiceCreate(t *testing.T) {
 				Destination: 2,
 				Amount:      500,
 			},
+			assertErr: testutil.AssertNoErr,
 		},
 		{
 			name: "create transfer with insufficient funds",

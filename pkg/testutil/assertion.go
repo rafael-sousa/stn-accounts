@@ -7,6 +7,13 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 )
 
+// AssertNoErr asserts that value stored at err is nil otherwise fails the testcase
+func AssertNoErr(t *testing.T, err error) {
+	if err != nil {
+		t.Errorf("expected no error but got %v", err)
+	}
+}
+
 // AssertCustomErr asserts that the err has the code and msg expected
 func AssertCustomErr(t *testing.T, c types.ErrCode, err error, msg string) {
 	if customErr, ok := err.(*types.Err); ok {

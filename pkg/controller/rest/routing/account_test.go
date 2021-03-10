@@ -14,6 +14,7 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/routing"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/dto"
 	"github.com/rafael-sousa/stn-accounts/pkg/service"
+	"github.com/rafael-sousa/stn-accounts/pkg/testutil"
 )
 
 func TestRoutingAccountFetch(t *testing.T) {
@@ -29,8 +30,8 @@ func TestRoutingAccountFetch(t *testing.T) {
 			status: http.StatusOK,
 			path:   "/",
 			service: func() service.Account {
-				return &accountServMock{
-					fetch: func(c context.Context) ([]*dto.AccountView, error) {
+				return &testutil.AccountServMock{
+					ExpectFetch: func(c context.Context) ([]*dto.AccountView, error) {
 						return []*dto.AccountView{}, nil
 					},
 				}
@@ -41,12 +42,12 @@ func TestRoutingAccountFetch(t *testing.T) {
 			status: http.StatusOK,
 			path:   "/",
 			service: func() service.Account {
-				return &accountServMock{
-					fetch: func(c context.Context) ([]*dto.AccountView, error) {
+				return &testutil.AccountServMock{
+					ExpectFetch: func(c context.Context) ([]*dto.AccountView, error) {
 						return []*dto.AccountView{
-							newAccountView(1, "Jose", "00000000000", 5, time.Now()),
-							newAccountView(2, "Silva", "11111111111", 10, time.Now()),
-							newAccountView(3, "Sousa", "22222222222", 20, time.Now()),
+							testutil.NewAccountView(1, "Jose", "00000000000", 5, time.Now()),
+							testutil.NewAccountView(2, "Silva", "11111111111", 10, time.Now()),
+							testutil.NewAccountView(3, "Sousa", "22222222222", 20, time.Now()),
 						}, nil
 					},
 				}
@@ -67,7 +68,7 @@ func TestRoutingAccountFetch(t *testing.T) {
 			res := httptest.NewRecorder()
 			r.ServeHTTP(res, req)
 
-			assertEq(t, "status code", tc.status, res.Code)
+			testutil.AssertEq(t, "status code", tc.status, res.Code)
 		})
 	}
 }
@@ -85,15 +86,15 @@ func TestRoutingAccountGetBalance(t *testing.T) {
 			status: http.StatusOK,
 			path:   "/1/balance",
 			service: func(t *testing.T) service.Account {
-				return &accountServMock{
-					getBalance: func(c context.Context, i int64) (float64, error) {
-						assertEq(t, "id", int64(1), i)
+				return &testutil.AccountServMock{
+					ExpectGetBalance: func(c context.Context, i int64) (float64, error) {
+						testutil.AssertEq(t, "id", int64(1), i)
 						return 50, nil
 					},
 				}
 			},
 			assertRes: func(t *testing.T, rec *httptest.ResponseRecorder) {
-				assertEq(t, "response balance", "50", string(bytes.TrimSpace(rec.Body.Bytes())))
+				testutil.AssertEq(t, "response balance", "50", string(bytes.TrimSpace(rec.Body.Bytes())))
 			},
 		},
 	}
@@ -111,7 +112,7 @@ func TestRoutingAccountGetBalance(t *testing.T) {
 			res := httptest.NewRecorder()
 			r.ServeHTTP(res, req)
 
-			assertEq(t, "status code", tc.status, res.Code)
+			testutil.AssertEq(t, "status code", tc.status, res.Code)
 			tc.assertRes(t, res)
 		})
 	}
@@ -131,14 +132,14 @@ func TestRoutingAccountCreate(t *testing.T) {
 			status: http.StatusCreated,
 			path:   "/",
 			service: func() service.Account {
-				return &accountServMock{
-					create: func(c context.Context, ac *dto.AccountCreation) (*dto.AccountView, error) {
-						return newAccountView(4, "Garcia", "33333333333", 25, time.Now()), nil
+				return &testutil.AccountServMock{
+					ExpectCreate: func(c context.Context, ac *dto.AccountCreation) (*dto.AccountView, error) {
+						return testutil.NewAccountView(4, "Garcia", "33333333333", 25, time.Now()), nil
 					},
 				}
 			},
 			reader: func() (io.Reader, error) {
-				if body, err := json.Marshal(newAccountCreation("Garcia", "33333333333", 25)); err == nil {
+				if body, err := json.Marshal(testutil.NewAccountCreation("Garcia", "33333333333", "", 25)); err == nil {
 					return bytes.NewBuffer(body), nil
 				} else {
 					return nil, err
@@ -165,7 +166,7 @@ func TestRoutingAccountCreate(t *testing.T) {
 			res := httptest.NewRecorder()
 			r.ServeHTTP(res, req)
 
-			assertEq(t, "status code", tc.status, res.Code)
+			testutil.AssertEq(t, "status code", tc.status, res.Code)
 		})
 	}
 }

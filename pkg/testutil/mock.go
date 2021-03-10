@@ -3,6 +3,7 @@ package testutil
 import (
 	"context"
 
+	"github.com/rafael-sousa/stn-accounts/pkg/model/dto"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/entity"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 	"github.com/rafael-sousa/stn-accounts/pkg/repository"
@@ -76,4 +77,48 @@ func (r *TransferRepoMock) Fetch(ctx context.Context, id int64) ([]*entity.Trans
 // Create mocks the functionality of repository.Transfer#Create
 func (r *TransferRepoMock) Create(ctx context.Context, e *entity.Transfer) (*entity.Transfer, error) {
 	return r.ExpectCreate(ctx, e)
+}
+
+// AccountServMock mocks the service.Account interface
+type AccountServMock struct {
+	ExpectFetch      func(context.Context) ([]*dto.AccountView, error)
+	ExpectGetBalance func(context.Context, int64) (float64, error)
+	ExpectCreate     func(context.Context, *dto.AccountCreation) (*dto.AccountView, error)
+	ExpectLogin      func(context.Context, string, string) (*dto.AccountView, error)
+}
+
+// Fetch mocks the functionality of service.Account#Fetch
+func (s *AccountServMock) Fetch(ctx context.Context) ([]*dto.AccountView, error) {
+	return s.ExpectFetch(ctx)
+}
+
+// GetBalance mocks the functionality of service.Account#GetBalance
+func (s *AccountServMock) GetBalance(ctx context.Context, id int64) (float64, error) {
+	return s.ExpectGetBalance(ctx, id)
+}
+
+// Create mocks the functionality of service.Account#Create
+func (s *AccountServMock) Create(ctx context.Context, d *dto.AccountCreation) (*dto.AccountView, error) {
+	return s.ExpectCreate(ctx, d)
+}
+
+// Login mocks the functionality of service.Account#Login
+func (s *AccountServMock) Login(ctx context.Context, cpf string, secret string) (*dto.AccountView, error) {
+	return s.ExpectLogin(ctx, cpf, secret)
+}
+
+// TransferServMock mocks the service.Transfer interface
+type TransferServMock struct {
+	ExpectFetch  func(context.Context, int64) ([]*dto.TransferView, error)
+	ExpectCreate func(context.Context, int64, *dto.TransferCreation) (*dto.TransferView, error)
+}
+
+// Fetch mocks the functionality of service.Transfer#Fetch
+func (s *TransferServMock) Fetch(ctx context.Context, id int64) ([]*dto.TransferView, error) {
+	return s.ExpectFetch(ctx, id)
+}
+
+// Create mocks the functionality of service.Transfer#Create
+func (s *TransferServMock) Create(ctx context.Context, origin int64, d *dto.TransferCreation) (*dto.TransferView, error) {
+	return s.ExpectCreate(ctx, origin, d)
 }

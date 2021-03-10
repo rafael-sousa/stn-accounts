@@ -40,3 +40,32 @@ func NewEntityTransfer(id, origin, destination int64, b float64) *entity.Transfe
 		CreatedAt:   time.Now().UTC().Truncate(time.Second),
 	}
 }
+
+// NewAccountView returns a new *dto.AccountView value pointer from the given args
+func NewAccountView(id int64, name, cpf string, balance float64, createdAt time.Time) *dto.AccountView {
+	return &dto.AccountView{
+		ID:        id,
+		Name:      name,
+		CPF:       cpf,
+		Balance:   balance,
+		CreatedAt: createdAt,
+	}
+}
+
+// NewTransferCreation returns a new *dto.TransferCreation value pointer from the given args
+func NewTransferCreation(dest int64, amt float64) *dto.TransferCreation {
+	return &dto.TransferCreation{
+		Destination: dest,
+		Amount:      amt,
+	}
+}
+
+// NewTransferView returns a new *dto.TransferView value pointer from the given args
+func NewTransferView(id, destination int64, amount float64) *dto.TransferView {
+	return &dto.TransferView{
+		ID:          id,
+		Destination: destination,
+		Amount:      amount,
+		CreatedAt:   time.Now(),
+	}
+}

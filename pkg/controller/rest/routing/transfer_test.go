@@ -13,6 +13,7 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/routing"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/dto"
 	"github.com/rafael-sousa/stn-accounts/pkg/service"
+	"github.com/rafael-sousa/stn-accounts/pkg/testutil"
 )
 
 func TestRoutingTransferFetch(t *testing.T) {
@@ -30,7 +31,7 @@ func TestRoutingTransferFetch(t *testing.T) {
 			status: http.StatusUnauthorized,
 			path:   "/",
 			service: func() service.Transfer {
-				return &transferServMock{}
+				return &testutil.TransferServMock{}
 			},
 		},
 		{
@@ -38,9 +39,9 @@ func TestRoutingTransferFetch(t *testing.T) {
 			status: http.StatusOK,
 			path:   "/",
 			service: func() service.Transfer {
-				return &transferServMock{
-					fetch: func(c context.Context, i int64) ([]*dto.TransferView, error) {
-						assertEq(t, "id", int64(1), i)
+				return &testutil.TransferServMock{
+					ExpectFetch: func(c context.Context, i int64) ([]*dto.TransferView, error) {
+						testutil.AssertEq(t, "id", int64(1), i)
 						return []*dto.TransferView{}, nil
 					},
 				}
@@ -54,13 +55,13 @@ func TestRoutingTransferFetch(t *testing.T) {
 			status: http.StatusOK,
 			path:   "/",
 			service: func() service.Transfer {
-				return &transferServMock{
-					fetch: func(c context.Context, i int64) ([]*dto.TransferView, error) {
-						assertEq(t, "id", int64(1), i)
+				return &testutil.TransferServMock{
+					ExpectFetch: func(c context.Context, i int64) ([]*dto.TransferView, error) {
+						testutil.AssertEq(t, "id", int64(1), i)
 						return []*dto.TransferView{
-							newTransferView(1, 2, 5),
-							newTransferView(2, 2, 10),
-							newTransferView(3, 2, 20),
+							testutil.NewTransferView(1, 2, 5),
+							testutil.NewTransferView(2, 2, 10),
+							testutil.NewTransferView(3, 2, 20),
 						}, nil
 					},
 				}
@@ -90,7 +91,7 @@ func TestRoutingTransferFetch(t *testing.T) {
 			res := httptest.NewRecorder()
 			r.ServeHTTP(res, req)
 
-			assertEq(t, "status code", tc.status, res.Code)
+			testutil.AssertEq(t, "status code", tc.status, res.Code)
 		})
 	}
 }
@@ -111,12 +112,12 @@ func TestRoutingTransferCreate(t *testing.T) {
 			status: http.StatusCreated,
 			path:   "/",
 			service: func() service.Transfer {
-				return &transferServMock{
-					create: func(c context.Context, i int64, d *dto.TransferCreation) (*dto.TransferView, error) {
-						assertEq(t, "id", int64(1), i)
-						assertEq(t, "destination", int64(2), d.Destination)
-						assertEq(t, "amount", float64(500), d.Amount)
-						return newTransferView(1, d.Destination, d.Amount), nil
+				return &testutil.TransferServMock{
+					ExpectCreate: func(c context.Context, i int64, d *dto.TransferCreation) (*dto.TransferView, error) {
+						testutil.AssertEq(t, "id", int64(1), i)
+						testutil.AssertEq(t, "destination", int64(2), d.Destination)
+						testutil.AssertEq(t, "amount", float64(500), d.Amount)
+						return testutil.NewTransferView(1, d.Destination, d.Amount), nil
 					},
 				}
 			},
@@ -124,7 +125,7 @@ func TestRoutingTransferCreate(t *testing.T) {
 				"Authorization": "Bearer " + token,
 			},
 			reader: func() (io.Reader, error) {
-				if body, err := json.Marshal(newTransferCreation(2, 500)); err == nil {
+				if body, err := json.Marshal(testutil.NewTransferCreation(2, 500)); err == nil {
 					return bytes.NewBuffer(body), nil
 				} else {
 					return nil, err
@@ -157,7 +158,7 @@ func TestRoutingTransferCreate(t *testing.T) {
 			res := httptest.NewRecorder()
 			r.ServeHTTP(res, req)
 
-			assertEq(t, "status code", tc.status, res.Code)
+			testutil.AssertEq(t, "status code", tc.status, res.Code)
 		})
 	}
 }

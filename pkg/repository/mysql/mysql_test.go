@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"testing"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate"
@@ -15,7 +14,6 @@ import (
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/ory/dockertest/v3"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/entity"
-	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 	"github.com/rafael-sousa/stn-accounts/pkg/repository"
 )
 
@@ -50,17 +48,6 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func newAccount(id int64, n, cpf, s string, b float64) *entity.Account {
-	return &entity.Account{
-		ID:        id,
-		Name:      n,
-		CPF:       cpf,
-		Secret:    s,
-		Balance:   types.NewCurrency(b),
-		CreatedAt: time.Now().UTC().Truncate(time.Second),
-	}
-}
-
 func runMigrations(pool *dockertest.Pool) {
 	driver, err := mysql.WithInstance(db, &mysql.Config{})
 	logFatal(err, "unable to get driver instance")
@@ -83,4 +70,24 @@ func logFatal(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s, %v", msg, err)
 	}
+}
+
+func persistTestAccountEntity(t *testing.T, input []*entity.Account) map[int64]*entity.Account {
+	entities := make(map[int64]*entity.Account, 0)
+	if len(input) == 0 {
+		return entities
+	}
+	t.Cleanup(dbWipe)
+	stmt, err := db.Prepare("INSERT INTO account(name,cpf,secret,balance,created_at) VALUES (?,?,?,?,?)")
+	logFatal(err, "unable to prepare account insert stmt")
+	defer stmt.Close()
+	for _, e := range input {
+		result, _ := stmt.Exec(e.Name, e.CPF, e.Secret, e.Balance, e.CreatedAt)
+		logFatal(err, "unable to exec account insert stmt")
+		id, _ := result.LastInsertId()
+		logFatal(err, "unable to retrieve inserted account id")
+		e.ID = id
+		entities[id] = e
+	}
+	return entities
 }

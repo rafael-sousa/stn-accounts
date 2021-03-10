@@ -8,27 +8,8 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/model/entity"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 	"github.com/rafael-sousa/stn-accounts/pkg/repository/mysql"
+	"github.com/rafael-sousa/stn-accounts/pkg/testutil"
 )
-
-func persistTestAccountEntity(t *testing.T, input []*entity.Account) map[int64]*entity.Account {
-	entities := make(map[int64]*entity.Account, 0)
-	if len(input) == 0 {
-		return entities
-	}
-	t.Cleanup(dbWipe)
-	stmt, err := db.Prepare("INSERT INTO account(name,cpf,secret,balance,created_at) VALUES (?,?,?,?,?)")
-	logFatal(err, "unable to prepare account insert stmt")
-	defer stmt.Close()
-	for _, e := range input {
-		result, _ := stmt.Exec(e.Name, e.CPF, e.Secret, e.Balance, e.CreatedAt)
-		logFatal(err, "unable to exec account insert stmt")
-		id, _ := result.LastInsertId()
-		logFatal(err, "unable to retrieve inserted account id")
-		e.ID = id
-		entities[id] = e
-	}
-	return entities
-}
 
 func TestAccountRepositoryFetch(t *testing.T) {
 	repo := mysql.NewAccount(&txr)
@@ -39,9 +20,9 @@ func TestAccountRepositoryFetch(t *testing.T) {
 		{
 			name: "fetch accounts with data",
 			input: []*entity.Account{
-				newAccount(0, "Joe", "00000000000", "S001", 1),
-				newAccount(0, "John", "00000000001", "S002", 2),
-				newAccount(0, "Suz", "00000000002", "S003", 3),
+				testutil.NewAccount(0, "Joe", "00000000000", "S001", 1),
+				testutil.NewAccount(0, "John", "00000000001", "S002", 2),
+				testutil.NewAccount(0, "Suz", "00000000002", "S003", 3),
 			},
 		},
 		{
@@ -55,9 +36,7 @@ func TestAccountRepositoryFetch(t *testing.T) {
 			entities := persistTestAccountEntity(t, tc.input)
 
 			if accs, err := repo.Fetch(context.Background()); err == nil {
-				if len(accs) != len(tc.input) {
-					t.Errorf("expected result size equal to '%d' but got '%d'", len(tc.input), len(accs))
-				}
+				testutil.AssertEq(t, "result size", len(tc.input), len(accs))
 				for _, acc := range accs {
 					if expected, ok := entities[acc.ID]; ok {
 						if !reflect.DeepEqual(*expected, *acc) {
@@ -83,10 +62,10 @@ func TestAccountRepositoryCreate(t *testing.T) {
 		{
 			name: "create account with valid input",
 			input: []*entity.Account{
-				newAccount(0, "John", "33333333331", "S300", 300),
-				newAccount(0, "Jose", "33333333332", "S301", 301),
-				newAccount(0, "Silva", "33333333333", "S302", 302),
-				newAccount(0, "Sousa", "33333333334", "S303", 303),
+				testutil.NewAccount(0, "John", "33333333331", "S300", 300),
+				testutil.NewAccount(0, "Jose", "33333333332", "S301", 301),
+				testutil.NewAccount(0, "Silva", "33333333333", "S302", 302),
+				testutil.NewAccount(0, "Sousa", "33333333334", "S303", 303),
 			},
 		},
 	}
@@ -124,7 +103,7 @@ func TestAccountRepositoryGetBalance(t *testing.T) {
 	}{
 		{
 			name:  "get balance from existing account",
-			input: newAccount(0, "Peter", "44444444441", "S400", 400),
+			input: testutil.NewAccount(0, "Peter", "44444444441", "S400", 400),
 			prepare: func(t *testing.T, e *entity.Account) {
 				persistTestAccountEntity(t, []*entity.Account{e})
 			},
@@ -134,20 +113,10 @@ func TestAccountRepositoryGetBalance(t *testing.T) {
 		},
 		{
 			name:    "get balance from nonexisting account",
-			input:   newAccount(0, "Bob", "44444444442", "S401", 401),
+			input:   testutil.NewAccount(0, "Bob", "44444444442", "S401", 401),
 			prepare: func(t *testing.T, e *entity.Account) {},
 			assert: func(t *testing.T, err error) {
-				if customErr, ok := err.(*types.Err); ok {
-					msg := "no result getting the account balance"
-					if customErr.Msg != msg {
-						t.Errorf("expected error message equal to '%s' but got '%s'", msg, customErr.Msg)
-					}
-					if customErr.Code != types.EmptyResultErr {
-						t.Errorf("expected error code equal to '%v' but got '%v'", types.EmptyResultErr, customErr.Code)
-					}
-				} else {
-					t.Error(err)
-				}
+				testutil.AssertCustomErr(t, types.EmptyResultErr, err, "no result getting the account balance")
 			},
 		},
 	}
@@ -176,7 +145,7 @@ func TestAccountRepositoryFindBy(t *testing.T) {
 	}{
 		{
 			name:  "find by cpf with existing account",
-			input: newAccount(0, "Maria", "55555555551", "S500", 500),
+			input: testutil.NewAccount(0, "Maria", "55555555551", "S500", 500),
 			prepare: func(t *testing.T, e *entity.Account) {
 				persistTestAccountEntity(t, []*entity.Account{e})
 			},
@@ -186,20 +155,10 @@ func TestAccountRepositoryFindBy(t *testing.T) {
 		},
 		{
 			name:    "find by cpf with nonexisting account",
-			input:   newAccount(0, "Helena", "55555555552", "S501", 501),
+			input:   testutil.NewAccount(0, "Helena", "55555555552", "S501", 501),
 			prepare: func(t *testing.T, e *entity.Account) {},
 			assert: func(t *testing.T, err error) {
-				if customErr, ok := err.(*types.Err); ok {
-					msg := "no result finding account by cpf"
-					if customErr.Msg != msg {
-						t.Errorf("expected error message equal to '%s' but got '%s'", msg, customErr.Msg)
-					}
-					if customErr.Code != types.EmptyResultErr {
-						t.Errorf("expected error code equal to '%v' but got '%v'", types.EmptyResultErr, customErr.Code)
-					}
-				} else {
-					t.Error(err)
-				}
+				testutil.AssertCustomErr(t, types.EmptyResultErr, err, "no result finding account by cpf")
 			},
 		},
 	}
@@ -236,7 +195,7 @@ func TestAccountRepositoryUpdateBalance(t *testing.T) {
 	}{
 		{
 			name:  "update balance from existing account",
-			input: newAccount(0, "Izzy", "66666666661", "S600", 600),
+			input: testutil.NewAccount(0, "Izzy", "66666666661", "S600", 600),
 			prepare: func(t *testing.T, e *entity.Account) {
 				persistTestAccountEntity(t, []*entity.Account{e})
 			},
@@ -247,20 +206,10 @@ func TestAccountRepositoryUpdateBalance(t *testing.T) {
 		},
 		{
 			name:    "update balance from nonexisting account",
-			input:   newAccount(0, "Suzy", "66666666662", "S602", 602),
+			input:   testutil.NewAccount(0, "Suzy", "66666666662", "S602", 602),
 			prepare: func(t *testing.T, e *entity.Account) {},
 			assert: func(t *testing.T, err error) {
-				if customErr, ok := err.(*types.Err); ok {
-					msg := "no rows affected by the update balance stmt"
-					if customErr.Msg != msg {
-						t.Errorf("expected error message equal to '%s' but got '%s'", msg, customErr.Msg)
-					}
-					if customErr.Code != types.NoRowAffectedErr {
-						t.Errorf("expected error code equal to '%v' but got '%v'", types.NoRowAffectedErr, customErr.Code)
-					}
-				} else {
-					t.Error(err)
-				}
+				testutil.AssertCustomErr(t, types.NoRowAffectedErr, err, "no rows affected by the update balance stmt")
 			},
 			expectedBalance: types.NewCurrency(999),
 		},
@@ -295,7 +244,7 @@ func TestAccountRepositoryExists(t *testing.T) {
 	}{
 		{
 			name:  "existing account",
-			input: newAccount(0, "William", "77777777771", "S701", 701),
+			input: testutil.NewAccount(0, "William", "77777777771", "S701", 701),
 			prepare: func(t *testing.T, e *entity.Account) {
 				persistTestAccountEntity(t, []*entity.Account{e})
 			},
@@ -303,7 +252,7 @@ func TestAccountRepositoryExists(t *testing.T) {
 		},
 		{
 			name:    "nonexisting account",
-			input:   newAccount(0, "James", "77777777771", "S702", 702),
+			input:   testutil.NewAccount(0, "James", "77777777771", "S702", 702),
 			prepare: func(t *testing.T, e *entity.Account) {},
 		},
 	}
@@ -312,9 +261,7 @@ func TestAccountRepositoryExists(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.prepare(t, tc.input)
 			if exists, err := repo.Exists(context.Background(), tc.input.ID); err == nil {
-				if exists != tc.expected {
-					t.Errorf("expected account existence equal to '%v' but got '%v'", tc.expected, exists)
-				}
+				testutil.AssertEq(t, "account existence", tc.expected, exists)
 			} else {
 				t.Error(err)
 			}

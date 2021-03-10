@@ -9,6 +9,7 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/model/entity"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 	"github.com/rafael-sousa/stn-accounts/pkg/repository/mysql"
+	"github.com/rafael-sousa/stn-accounts/pkg/testutil"
 )
 
 func TestTransferRepositoryFetch(t *testing.T) {
@@ -19,7 +20,7 @@ func TestTransferRepositoryFetch(t *testing.T) {
 		prepare      func(*testing.T) (int64, int64, int64)
 	}{
 		{
-			name:         "fetch transfers with result",
+			name:         "fetch transfers with result successfully",
 			expectedSize: 1,
 			prepare: func(t *testing.T) (int64, int64, int64) {
 				t.Cleanup(dbWipe)
@@ -53,9 +54,7 @@ func TestTransferRepositoryFetch(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			origin, _, _ := tc.prepare(t)
 			if transfers, err := repo.Fetch(context.Background(), origin); err == nil {
-				if len(transfers) != tc.expectedSize {
-					t.Errorf("expected return size equal to '%d' but got '%d'", tc.expectedSize, len(transfers))
-				}
+				testutil.AssertEq(t, "return size", tc.expectedSize, len(transfers))
 			} else {
 				t.Error(err)
 			}
@@ -72,7 +71,7 @@ func TestTransferRepositoryCreate(t *testing.T) {
 		prepare      func(*testing.T) *entity.Transfer
 	}{
 		{
-			name:         "create transfer with result",
+			name:         "create transfer successfully",
 			expectedSize: 1,
 			prepare: func(t *testing.T) *entity.Transfer {
 				t.Cleanup(dbWipe)

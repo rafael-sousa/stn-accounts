@@ -19,7 +19,7 @@ func (v *Transfer) Creation(ctx context.Context, origin int64, transferCreation 
 	if transferCreation.Amount <= 0 {
 		return greaterThanErr("amount", 0)
 	}
-	if transferCreation.Destination == 0 {
+	if transferCreation.Destination <= 0 {
 		return requiredFieldErr("destination_id")
 	}
 	if transferCreation.Destination == origin {
@@ -39,7 +39,7 @@ func (v *Transfer) Creation(ctx context.Context, origin int64, transferCreation 
 	if err != nil {
 		return err
 	} else if !exists {
-		return notFoundErr("destination", origin)
+		return notFoundErr("destination", transferCreation.Destination)
 	}
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/body"
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/jwt"
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/response"
+	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 	"github.com/rafael-sousa/stn-accounts/pkg/service"
 	"github.com/rs/zerolog/log"
 )
@@ -32,7 +33,7 @@ func (h *loginHandler) post(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 	if err != nil {
 		log.Error().Caller().Err(err).Msg("unable to decode request body as body.LoginRequest")
-		response.WriteErr(w, r, err)
+		response.WriteErr(w, r, types.NewErr(types.ValidationErr, "invalid request body", nil))
 		return
 	}
 	view, err := (*h.accountSrv).Login(r.Context(), requestBody.CPF, requestBody.Secret)

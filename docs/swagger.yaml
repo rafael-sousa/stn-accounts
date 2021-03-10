@@ -96,7 +96,7 @@ info:
   description: Application that exposes a REST API.
   license:
     name: MIT
-    url: path to git repo
+    url: https://github.com/rafael-sousa/stn-accounts/blob/main/LICENSE
   title: Account REST API
   version: "1.0"
 paths:

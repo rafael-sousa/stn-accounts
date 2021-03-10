@@ -25,7 +25,7 @@ var doc = `{
         },
         "license": {
             "name": "MIT",
-            "url": "path to git repo"
+            "url": "https://github.com/rafael-sousa/stn-accounts/blob/main/LICENSE"
         },
         "version": "{{.Version}}"
     },

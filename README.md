@@ -14,9 +14,6 @@
   <ol>
     <li>
       <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
@@ -46,16 +43,13 @@
 
 This project aims to fulfill the proposed technical challenge applying software development patterns and following the Go's best practices and conventions. The API exposes endpoints that handles operations on `Account` and `Transfer` core domain of a digital bank.
 
-### Built With
-
-* [Go 1.15+](https://golang.org/)
-
 ## Getting Started
 
 This section describes the steps to get a local copy up and running.
 
 ### Prerequisites
 
+* [Go 1.15+](https://golang.org/)
 * [Docker](https://www.docker.com/)
 * [Docker Compose](https://docs.docker.com/compose/)
 
@@ -182,14 +176,14 @@ The following table lists the direct dependencies used by the application. A com
 
 ## Troubleshooting
 
-* Error when mouting docker-compose data volume
+* Error when mounting docker-compose data volume
     1. Edit the docker agent settings
     2. On the left menu, navigate to Resources -> File Sharing
     3. Click at the '+' button and add the download repository directory
     4. Apply the settings and wait the service restart
 
 * Error during database test execution "Could not start resource ... No connection could be made because the target machine actively refused it"
-    1. Add environment variable DOCKER_HOST a with value 'tcp://127.0.0.1:2375'
+    1. Add environment variable DOCKER_HOST a with value `tcp://127.0.0.1:2375`
     2. Edit the docker agent settings
     3. On the left menu, navigate to General
     4. Check the "Expose daemon on tcp://localhost:2375 without TLS" option

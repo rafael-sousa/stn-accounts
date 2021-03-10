@@ -65,10 +65,17 @@ This section describes the steps to get a local copy up and running.
    make start
    ```
 
-2. Stop the running API
+
+3. Once running, the swagger UI is available at
+   ```
+   localhost:3000/swagger/index.html
+   ```
+
+4. Stop the running API
    ```sh
    make stop
    ```
+
 
 ### API Routes
 
@@ -200,7 +207,10 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Acknowledgements
 
-1. https://levelup.gitconnected.com/complete-guide-to-create-docker-container-for-your-golang-application-80f3fb59a15e
-2. https://towardsdatascience.com/slimming-down-your-docker-images-275f0ca9337e
-3. https://github.com/uber-go/guide/blob/master/style.md
-4. https://0.30000000000000004.com/
+1. [Complete Guide to Create Docker Container for Your Golang Application](https://levelup.gitconnected.com/complete-guide-to-create-docker-container-for-your-golang-application-80f3fb59a15e)
+2. [Slimming Down Your Docker Images](https://towardsdatascience.com/slimming-down-your-docker-images-275f0ca9337e)
+3. [Uber Go Style Guide](https://github.com/uber-go/guide/blob/master/style.md)
+4. [Unit Testing made easy in Go](https://medium.com/rungo/unit-testing-made-easy-in-go-25077669318)
+5. [Golang's Mocking Techniques](https://www.youtube.com/watch?v=LEnXBueFBzk)
+6. [Go: Are pointers a performance optimization?](https://medium.com/@vCabbage/go-are-pointers-a-performance-optimization-a95840d3ef85)
+7. [When to use pointers in Go](https://medium.com/@meeusdylan/when-to-use-pointers-in-go-44c15fe04eac)

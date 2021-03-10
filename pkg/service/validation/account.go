@@ -26,13 +26,14 @@ func (v *Account) Creation(ctx context.Context, accountCreation *dto.AccountCrea
 	if err := verifySecret(accountCreation.Secret); err != nil {
 		return err
 	}
+	if accountCreation.Balance < 0 {
+		return greaterOrEqualErr("balance", 0)
+	}
 
 	if account, err := (*v.AccountRepository).FindBy(ctx, accountCreation.CPF); account != nil && err == nil {
 		return uniqErr("cpf", accountCreation.CPF)
 	}
-	if accountCreation.Balance < 0 {
-		return greaterOrEqualErr("balance", 0)
-	}
+
 	return nil
 }
 

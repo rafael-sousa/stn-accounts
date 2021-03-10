@@ -1,3 +1,6 @@
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/rafael-sousa/stn-accounts)](https://github.com/rafael-sousa/stn-accounts)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rafael-sousa/stn-accounts)](https://goreportcard.com/report/github.com/rafael-sousa/stn-accounts)
+[![Go Reference](https://pkg.go.dev/badge/github.com/rafael-sousa/stn-accounts.svg)](https://pkg.go.dev/github.com/rafael-sousa/stn-accounts)
 
 <p align="center">
   <h3 align="center">STN Accounts</h3>
@@ -40,7 +43,6 @@
 
 
 ## About The Project
-<hr />
 
 This project aims to fulfill the proposed technical challenge applying software development patterns and following the Go's best practices and conventions. The API exposes endpoints that handles operations on `Account` and `Transfer` core domain of a digital bank.
 
@@ -49,7 +51,6 @@ This project aims to fulfill the proposed technical challenge applying software 
 * [Go 1.15+](https://golang.org/)
 
 ## Getting Started
-<hr />
 
 This section describes the steps to get a local copy up and running.
 
@@ -79,17 +80,16 @@ This section describes the steps to get a local copy up and running.
 
 The following table shows the current available endpoints
 
-| METHOD | PATH                           | AUTH                                       |
-|--------|--------------------------------|--------------------------------------------|
-| GET    | /accounts                      | <input type="checkbox" disabled />         |
-| GET    | /accounts/{id}/balance         | <input type="checkbox" disabled />         |
-| POST   | /accounts                      | <input type="checkbox" disabled />         |
-| POST   | /login                         | <input type="checkbox" disabled />         |
-| GET    | /transfers                     | <input type="checkbox" disabled checked /> |
-| POST   | /transfers                     | <input type="checkbox" disabled checked /> |
+| METHOD | PATH                           | AUTH |
+|--------|--------------------------------|------|
+| GET    | /accounts                      |      |
+| GET    | /accounts/{id}/balance         |      |
+| POST   | /accounts                      |      |
+| POST   | /login                         |      |
+| GET    | /transfers                     | X    |
+| POST   | /transfers                     | X    |
 
 ## Development
-<hr />
 
 This section portrays the application architecture and how their elements are laid
 
@@ -179,7 +179,26 @@ The following table lists the direct dependencies used by the application. A com
 | [http-swagger](github.com/swaggo/http-swagger)    | v1.0.0  | OpenAPI implementation                     |
 | [swag](github.com/swaggo/swag)                    | v1.7.0  | Static swagger files generator             |
 | [crypto](golang.org/x/crypto)                     | v0.0.0  | Password encrypter                         |
-### Troubleshooting
+
+## Troubleshooting
+
+* Error when mouting docker-compose data volume
+    1. Edit the docker agent settings
+    2. On the left menu, navigate to Resources -> File Sharing
+    3. Click at the '+' button and add the download repository directory
+    4. Apply the settings and wait the service restart
+
+* Error during database test execution "Could not start resource ... No connection could be made because the target machine actively refused it"
+    1. Add environment variable DOCKER_HOST a with value 'tcp://127.0.0.1:2375'
+    2. Edit the docker agent settings
+    3. On the left menu, navigate to General
+    4. Check the "Expose daemon on tcp://localhost:2375 without TLS" option
+
+* Cleaning up docker containers and volume
+    1. Stop docker-compose executions: docker-compose down
+    2. Delete all containers using the following command: docker rm -f $(docker ps -a -q)
+    3. Delete all volumes using the following command:docker volume rm $(docker volume ls -q)
+
 
 ## License
 
@@ -187,4 +206,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Acknowledgements
 
-* []()
+1. https://levelup.gitconnected.com/complete-guide-to-create-docker-container-for-your-golang-application-80f3fb59a15e
+2. https://towardsdatascience.com/slimming-down-your-docker-images-275f0ca9337e
+3. https://github.com/uber-go/guide/blob/master/style.md
+4. https://0.30000000000000004.com/

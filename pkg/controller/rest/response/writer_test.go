@@ -12,6 +12,7 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/body"
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/response"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
+	"github.com/rafael-sousa/stn-accounts/pkg/testutil"
 )
 
 func TestWriteSuccess(t *testing.T) {
@@ -33,9 +34,7 @@ func TestWriteSuccess(t *testing.T) {
 					t.Errorf("unable to read response body, %v", err)
 					return
 				}
-				if len(body) != 0 {
-					t.Errorf("expected response body size equal to '%d' but got '%d'", 0, len(body))
-				}
+				testutil.AssertEq(t, "response body", 0, len(body))
 			},
 		},
 		{
@@ -44,10 +43,7 @@ func TestWriteSuccess(t *testing.T) {
 			method:     http.MethodPost,
 			resourceID: 1,
 			assertResponse: func(t *testing.T, r *http.Response) {
-				location := r.Header.Get("Location")
-				if location != "/foo/1" {
-					t.Errorf("expected location header equal to '%s' but got '%s'", "/foo/1", location)
-				}
+				testutil.AssertEq(t, "location header", "/foo/1", r.Header.Get("Location"))
 			},
 			responseBody: "body",
 		},
@@ -61,9 +57,7 @@ func TestWriteSuccess(t *testing.T) {
 					t.Errorf("unable to read response body, %v", err)
 					return
 				}
-				if string(bytes.TrimSpace(b)) != `"content"` {
-					t.Errorf("expected response body equal to '%s' but got '%s'", `"content"`, string(b))
-				}
+				testutil.AssertEq(t, "response body", `"content"`, string(bytes.TrimSpace(b)))
 			},
 			responseBody: "content",
 		},
@@ -79,9 +73,8 @@ func TestWriteSuccess(t *testing.T) {
 			res := httptest.NewRecorder()
 			response.WriteSuccess(res, request, tc.responseBody, tc.resourceID)
 
-			if res.Code != tc.statusCode {
-				t.Errorf("expected status code equal to '%d' but got '%d'", tc.statusCode, res.Code)
-			} else {
+			testutil.AssertEq(t, "status code", tc.statusCode, res.Code)
+			if res.Code == tc.statusCode {
 				tc.assertResponse(t, res.Result())
 			}
 		})
@@ -136,9 +129,8 @@ func TestWriteErr(t *testing.T) {
 			res := httptest.NewRecorder()
 			response.WriteErr(res, request, tc.err)
 
-			if res.Code != tc.statusCode {
-				t.Errorf("expected status code equal to '%d' but got '%d'", tc.statusCode, res.Code)
-			} else {
+			testutil.AssertEq(t, "status code", tc.statusCode, res.Code)
+			if res.Code == tc.statusCode {
 				b := body.JSONError{}
 				if err = json.NewDecoder(res.Body).Decode(&b); err != nil {
 					t.Errorf("unable to parse response body")

@@ -9,6 +9,7 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/jwt"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/env"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
+	"github.com/rafael-sousa/stn-accounts/pkg/testutil"
 )
 
 func TestGenerate(t *testing.T) {
@@ -34,14 +35,11 @@ func TestGenerate(t *testing.T) {
 				if len(token) == 0 {
 					t.Error("expected not empty token")
 				}
-				if claims.Issuer != strconv.FormatInt(tc.input, 10) {
-					t.Errorf("expected token issuer equal to '%v' but got '%v'", tc.input, claims.Issuer)
-				}
+				testutil.AssertEq(t, "token issuer", claims.Issuer, strconv.FormatInt(tc.input, 10))
 				currentTimeout := claims.ExpiresAt - claims.IssuedAt
 				expectedTimeout := time.Duration(tc.config.TokenExpTimeout) * time.Minute
-				if currentTimeout != int64(expectedTimeout.Seconds()) {
-					t.Errorf("expected token timeout equal to '%v' but got '%v'", int64(expectedTimeout.Seconds()), currentTimeout)
-				}
+
+				testutil.AssertEq(t, "token timeout", int64(expectedTimeout.Seconds()), currentTimeout)
 			} else {
 				t.Error(err)
 			}
@@ -85,13 +83,7 @@ func TestParse(t *testing.T) {
 				Secret: []byte("secret"),
 			},
 			assertErr: func(t *testing.T, err error) {
-				if customErr, ok := err.(*types.Err); ok {
-					if customErr.Code != types.AuthenticationErr {
-						t.Errorf("expected err code equal to '%v' but got '%v'", types.AuthenticationErr, customErr.Code)
-					}
-				} else {
-					t.Error(err)
-				}
+				testutil.AssertCustomErr(t, types.AuthenticationErr, err, "expired or premature jwt token")
 			},
 		},
 		{
@@ -105,13 +97,7 @@ func TestParse(t *testing.T) {
 				Secret: []byte("oba"),
 			},
 			assertErr: func(t *testing.T, err error) {
-				if customErr, ok := err.(*types.Err); ok {
-					if customErr.Code != types.AuthenticationErr {
-						t.Errorf("expected err code equal to '%v' but got '%v'", types.AuthenticationErr, customErr.Code)
-					}
-				} else {
-					t.Error(err)
-				}
+				testutil.AssertCustomErr(t, types.AuthenticationErr, err, "invalid token signature")
 			},
 		},
 	}
@@ -125,9 +111,7 @@ func TestParse(t *testing.T) {
 				return
 			}
 			if claims, err := h.Parse(token); err == nil {
-				if claims.Issuer != tc.input.Issuer {
-					t.Errorf("expected token issuer equal to '%s' but got '%s'", tc.input.Issuer, claims.Issuer)
-				}
+				testutil.AssertEq(t, "token issuer", tc.input.Issuer, claims.Issuer)
 			} else {
 				tc.assertErr(t, err)
 			}

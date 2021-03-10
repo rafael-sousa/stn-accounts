@@ -11,6 +11,7 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/jwt"
 	"github.com/rafael-sousa/stn-accounts/pkg/controller/rest/middleware"
 	"github.com/rafael-sousa/stn-accounts/pkg/model/env"
+	"github.com/rafael-sousa/stn-accounts/pkg/testutil"
 )
 
 func TestAuthorizationRequest(t *testing.T) {
@@ -37,17 +38,13 @@ func TestAuthorizationRequest(t *testing.T) {
 				Issuer:    "1",
 			},
 			assertResponse: func(t *testing.T, r *http.Response) {
-				if r.StatusCode != http.StatusOK {
-					t.Errorf("expected status code '%d' but got '%d'", http.StatusOK, r.StatusCode)
-				}
+				testutil.AssertEq(t, "status code", http.StatusOK, r.StatusCode)
 			},
 		},
 		{
 			name: "intercept request with no auth header",
 			assertResponse: func(t *testing.T, r *http.Response) {
-				if r.StatusCode != http.StatusUnauthorized {
-					t.Errorf("expected status code '%d' but got '%d'", http.StatusUnauthorized, r.StatusCode)
-				}
+				testutil.AssertEq(t, "status code", http.StatusUnauthorized, r.StatusCode)
 			},
 		},
 		{
@@ -58,9 +55,7 @@ func TestAuthorizationRequest(t *testing.T) {
 				Issuer:    "1",
 			},
 			assertResponse: func(t *testing.T, r *http.Response) {
-				if r.StatusCode != http.StatusUnauthorized {
-					t.Errorf("expected status code '%d' but got '%d'", http.StatusUnauthorized, r.StatusCode)
-				}
+				testutil.AssertEq(t, "status code", http.StatusUnauthorized, r.StatusCode)
 			},
 		},
 		{
@@ -69,9 +64,7 @@ func TestAuthorizationRequest(t *testing.T) {
 				Issuer: "foo",
 			},
 			assertResponse: func(t *testing.T, r *http.Response) {
-				if r.StatusCode != http.StatusUnauthorized {
-					t.Errorf("expected status code '%d' but got '%d'", http.StatusUnauthorized, r.StatusCode)
-				}
+				testutil.AssertEq(t, "status code", http.StatusUnauthorized, r.StatusCode)
 			},
 		},
 	}
@@ -83,9 +76,7 @@ func TestAuthorizationRequest(t *testing.T) {
 
 			handler := m(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if id, ok := r.Context().Value(middleware.CtxAccountID).(int64); ok {
-					if tc.claims.Issuer != strconv.FormatInt(id, 10) {
-						t.Errorf("expected issuer id equal to '%s' but got '%v'", tc.claims.Issuer, id)
-					}
+					testutil.AssertEq(t, "issuer id", tc.claims.Issuer, strconv.FormatInt(id, 10))
 				} else {
 					t.Errorf("unabled to retrieve issuer id from request")
 				}

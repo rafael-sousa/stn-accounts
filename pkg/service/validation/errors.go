@@ -30,10 +30,6 @@ func maxSizeErr(n string, s int) error {
 	return types.NewErr(types.ValidationErr, fmt.Sprintf("field '%s' must have at most %d characters", n, s), nil)
 }
 
-func minSizeErr(n string, s int) error {
-	return types.NewErr(types.ValidationErr, fmt.Sprintf("field '%s' must have at least %d characters", n, s), nil)
-}
-
 func trailingWhiteSpaceErr(n string) error {
 	return types.NewErr(types.ValidationErr, fmt.Sprintf("field '%s' can't have trailing whitespace", n), nil)
 }

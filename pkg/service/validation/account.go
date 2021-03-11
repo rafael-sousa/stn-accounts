@@ -1,3 +1,4 @@
+// Package validation groups extensive business validation rules
 package validation
 
 import (

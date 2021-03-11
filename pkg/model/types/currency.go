@@ -1,3 +1,4 @@
+// Package types models the a variety of custom application types
 package types
 
 // Currency is a model that stores an amount as cents

@@ -1,3 +1,4 @@
+// Package middleware contains custom http request middlewares
 package middleware
 
 import (

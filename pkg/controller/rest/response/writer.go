@@ -1,3 +1,4 @@
+// Package response holds utility functions related to http response handling
 package response
 
 import (

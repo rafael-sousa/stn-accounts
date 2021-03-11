@@ -1,3 +1,4 @@
+// Package routing contains files that registers the REST endpoints handle by the application
 package routing
 
 import (

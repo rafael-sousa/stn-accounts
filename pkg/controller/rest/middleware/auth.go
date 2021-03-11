@@ -11,11 +11,11 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 )
 
-type key int
+type key string
 
 // Keys used to set request context values
 const (
-	CtxAccountID key = iota
+	CtxAccountID key = "CtxAccountID"
 )
 
 // NewAuthenticated creates a middleware that requires JWT Authorization Token Header

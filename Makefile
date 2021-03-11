@@ -8,10 +8,6 @@ stop:
 
 .PHONY: lint
 lint:
-	docker-compose -f docker-compose.yml down
-
-.PHONY: lint
-lint:
 	go mod tidy
 	go vet ./...
 	go fmt ./...
@@ -19,10 +15,10 @@ lint:
 
 .PHONY: test
 test:
-	go test -v ./...
+	go test ./...
 
-.PHONY: test
-test:
+.PHONY: build
+build:
 	go build -o bin/main.exe cmd/stn-accounts/main.go
 	docker-compose build
 

@@ -8,9 +8,9 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 )
 
-// NewEntityAccount returns a new *entity.Account value pointer from the given args
-func NewEntityAccount(id int64, n, cpf, s string, b float64) *entity.Account {
-	return &entity.Account{
+// NewEntityAccount returns a new entity.Account value from the given args
+func NewEntityAccount(id int64, n, cpf, s string, b float64) entity.Account {
+	return entity.Account{
 		ID:        id,
 		Name:      n,
 		CPF:       cpf,
@@ -20,9 +20,9 @@ func NewEntityAccount(id int64, n, cpf, s string, b float64) *entity.Account {
 	}
 }
 
-// NewAccountCreation returns a new *dto.AccountCreation value pointer from the given args
-func NewAccountCreation(n, cpf, s string, b float64) *dto.AccountCreation {
-	return &dto.AccountCreation{
+// NewAccountCreation returns a new *dto.AccountCreation value from the given args
+func NewAccountCreation(n, cpf, s string, b float64) dto.AccountCreation {
+	return dto.AccountCreation{
 		Name:    n,
 		CPF:     cpf,
 		Secret:  s,
@@ -30,9 +30,9 @@ func NewAccountCreation(n, cpf, s string, b float64) *dto.AccountCreation {
 	}
 }
 
-// NewEntityTransfer returns a new *entity.Transfer value pointer from the given args
-func NewEntityTransfer(id, origin, destination int64, b float64) *entity.Transfer {
-	return &entity.Transfer{
+// NewEntityTransfer returns a new entity.Transfer value from the given args
+func NewEntityTransfer(id, origin, destination int64, b float64) entity.Transfer {
+	return entity.Transfer{
 		ID:          id,
 		Origin:      origin,
 		Destination: destination,
@@ -41,9 +41,9 @@ func NewEntityTransfer(id, origin, destination int64, b float64) *entity.Transfe
 	}
 }
 
-// NewAccountView returns a new *dto.AccountView value pointer from the given args
-func NewAccountView(id int64, name, cpf string, balance float64, createdAt time.Time) *dto.AccountView {
-	return &dto.AccountView{
+// NewAccountView returns a new *dto.AccountView value from the given args
+func NewAccountView(id int64, name, cpf string, balance float64, createdAt time.Time) dto.AccountView {
+	return dto.AccountView{
 		ID:        id,
 		Name:      name,
 		CPF:       cpf,
@@ -52,15 +52,15 @@ func NewAccountView(id int64, name, cpf string, balance float64, createdAt time.
 	}
 }
 
-// NewTransferCreation returns a new *dto.TransferCreation value pointer from the given args
-func NewTransferCreation(dest int64, amt float64) *dto.TransferCreation {
-	return &dto.TransferCreation{
+// NewTransferCreation returns a new *dto.TransferCreation value from the given args
+func NewTransferCreation(dest int64, amt float64) dto.TransferCreation {
+	return dto.TransferCreation{
 		Destination: dest,
 		Amount:      amt,
 	}
 }
 
-// NewTransferView returns a new *dto.TransferView value pointer from the given args
+// NewTransferView returns a new *dto.TransferView value from the given args
 func NewTransferView(id, destination int64, amount float64) *dto.TransferView {
 	return &dto.TransferView{
 		ID:          id,

@@ -63,11 +63,11 @@ func TestTransferServiceFetch(t *testing.T) {
 					ExpectFetch: func(ctx context.Context, currentID int64) ([]entity.Transfer, error) {
 						testutil.AssertEq(t, "id", id, currentID)
 						return []entity.Transfer{
-							*testutil.NewEntityTransfer(1, 3, 2, 10),
-							*testutil.NewEntityTransfer(2, 3, 2, 20),
-							*testutil.NewEntityTransfer(3, 3, 2, 30),
-							*testutil.NewEntityTransfer(4, 3, 3, 40),
-							*testutil.NewEntityTransfer(5, 3, 3, 50),
+							testutil.NewEntityTransfer(1, 3, 2, 10),
+							testutil.NewEntityTransfer(2, 3, 2, 20),
+							testutil.NewEntityTransfer(3, 3, 2, 30),
+							testutil.NewEntityTransfer(4, 3, 3, 40),
+							testutil.NewEntityTransfer(5, 3, 3, 50),
 						}, nil
 					},
 				}

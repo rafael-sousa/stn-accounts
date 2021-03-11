@@ -72,8 +72,8 @@ func logFatal(err error, msg string) {
 	}
 }
 
-func persistTestAccountEntity(t *testing.T, input []*entity.Account) map[int64]*entity.Account {
-	entities := make(map[int64]*entity.Account, 0)
+func persistTestAccountEntity(t *testing.T, input []entity.Account) map[int64]entity.Account {
+	entities := make(map[int64]entity.Account, 0)
 	if len(input) == 0 {
 		return entities
 	}
@@ -86,7 +86,6 @@ func persistTestAccountEntity(t *testing.T, input []*entity.Account) map[int64]*
 		logFatal(err, "unable to exec account insert stmt")
 		id, _ := result.LastInsertId()
 		logFatal(err, "unable to retrieve inserted account id")
-		e.ID = id
 		entities[id] = e
 	}
 	return entities

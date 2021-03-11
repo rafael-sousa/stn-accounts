@@ -15,13 +15,13 @@ import (
 func TestAccountServiceCreate(t *testing.T) {
 	tt := []struct {
 		name      string
-		d         *dto.AccountCreation
-		repo      func(*dto.AccountCreation) repository.Account
+		d         dto.AccountCreation
+		repo      func(dto.AccountCreation) repository.Account
 		assertErr func(*testing.T, error)
 	}{
 		{
 			name: "create account successfully",
-			repo: func(d *dto.AccountCreation) repository.Account {
+			repo: func(d dto.AccountCreation) repository.Account {
 				return &testutil.AccountRepoMock{
 					ExpectFindBy: func(ctx context.Context, cpf string) (entity.Account, error) {
 						testutil.AssertEq(t, "cpf", d.CPF, cpf)
@@ -40,17 +40,17 @@ func TestAccountServiceCreate(t *testing.T) {
 		},
 		{
 			name: "create account with validation err",
-			repo: func(d *dto.AccountCreation) repository.Account {
+			repo: func(d dto.AccountCreation) repository.Account {
 				return &testutil.AccountRepoMock{}
 			},
-			d: &dto.AccountCreation{},
+			d: dto.AccountCreation{},
 			assertErr: func(t *testing.T, err error) {
 				testutil.AssertCustomErr(t, types.ValidationErr, err, "field 'name' is required")
 			},
 		},
 		{
 			name: "create account with repository error",
-			repo: func(d *dto.AccountCreation) repository.Account {
+			repo: func(d dto.AccountCreation) repository.Account {
 				return &testutil.AccountRepoMock{
 					ExpectFindBy: func(ctx context.Context, cpf string) (entity.Account, error) {
 						return entity.Account{}, types.NewErr(types.EmptyResultErr, "EmptyResultErr", nil)
@@ -71,7 +71,7 @@ func TestAccountServiceCreate(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := tc.repo(tc.d)
 			s := service.NewAccount(&txr, &repo)
-			acc, err := s.Create(context.Background(), *tc.d)
+			acc, err := s.Create(context.Background(), tc.d)
 			if err == nil && tc.assertErr == nil {
 				testutil.AssertNotDefault(t, "id", acc.ID)
 				testutil.AssertEq(t, "name", tc.d.Name, acc.Name)
@@ -110,9 +110,9 @@ func TestAccountServiceFetch(t *testing.T) {
 				return &testutil.AccountRepoMock{
 					ExpectFetch: func(ctx context.Context) ([]entity.Account, error) {
 						return []entity.Account{
-							*testutil.NewEntityAccount(1, "Jose", "00123456789", "PW001", 100),
-							*testutil.NewEntityAccount(2, "Maria", "98765432100", "PW002", 200),
-							*testutil.NewEntityAccount(3, "Silva", "98745632100", "PW003", 300),
+							testutil.NewEntityAccount(1, "Jose", "00123456789", "PW001", 100),
+							testutil.NewEntityAccount(2, "Maria", "98765432100", "PW002", 200),
+							testutil.NewEntityAccount(3, "Silva", "98745632100", "PW003", 300),
 						}, nil
 					},
 				}
@@ -208,8 +208,8 @@ func TestAccountServiceGetBalance(t *testing.T) {
 func TestAccountServiceLogin(t *testing.T) {
 	tt := []struct {
 		name      string
-		expected  *entity.Account
-		repo      func(*entity.Account) repository.Account
+		expected  entity.Account
+		repo      func(entity.Account) repository.Account
 		assertErr func(*testing.T, error)
 		cpf       string
 		secret    string
@@ -219,11 +219,11 @@ func TestAccountServiceLogin(t *testing.T) {
 			expected: testutil.NewEntityAccount(1, "Sousa", "41112075020", "$2a$10$c3GzxvPAAMS9pDqB9XIYi.kT/PN7CxfRev.BsRLvAJqVcZnFiW05i", 0),
 			secret:   "...",
 			cpf:      "41112075020",
-			repo: func(exp *entity.Account) repository.Account {
+			repo: func(exp entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{
 					ExpectFindBy: func(ctx context.Context, cpf string) (entity.Account, error) {
 						testutil.AssertEq(t, "cpf", exp.CPF, cpf)
-						return *exp, nil
+						return exp, nil
 					},
 				}
 			},
@@ -234,10 +234,10 @@ func TestAccountServiceLogin(t *testing.T) {
 			expected: testutil.NewEntityAccount(2, "Alice", "24039310047", "123", 10),
 			secret:   "123",
 			cpf:      "24039310047",
-			repo: func(exp *entity.Account) repository.Account {
+			repo: func(exp entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{
 					ExpectFindBy: func(ctx context.Context, cpf string) (entity.Account, error) {
-						return *exp, nil
+						return exp, nil
 					},
 				}
 			},
@@ -249,7 +249,7 @@ func TestAccountServiceLogin(t *testing.T) {
 			name:   "login with repository error",
 			secret: "...",
 			cpf:    "72098733097",
-			repo: func(exp *entity.Account) repository.Account {
+			repo: func(exp entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{
 					ExpectFindBy: func(ctx context.Context, cpf string) (entity.Account, error) {
 						return entity.Account{}, types.NewErr(types.InternalErr, "internal error", nil)
@@ -264,7 +264,7 @@ func TestAccountServiceLogin(t *testing.T) {
 			name:   "login with nonexistent account",
 			secret: "...",
 			cpf:    "61632733030",
-			repo: func(exp *entity.Account) repository.Account {
+			repo: func(exp entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{
 					ExpectFindBy: func(ctx context.Context, cpf string) (entity.Account, error) {
 						return entity.Account{}, types.NewErr(types.EmptyResultErr, "no result", nil)
@@ -278,7 +278,7 @@ func TestAccountServiceLogin(t *testing.T) {
 		{
 			name:   "login without cpf",
 			secret: "...",
-			repo: func(exp *entity.Account) repository.Account {
+			repo: func(exp entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{}
 			},
 			assertErr: func(t *testing.T, err error) {
@@ -288,7 +288,7 @@ func TestAccountServiceLogin(t *testing.T) {
 		{
 			name: "login without secret",
 			cpf:  "87256640005",
-			repo: func(exp *entity.Account) repository.Account {
+			repo: func(exp entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{}
 			},
 			assertErr: func(t *testing.T, err error) {

@@ -16,7 +16,7 @@ func TestAccountCreation(t *testing.T) {
 	tt := []struct {
 		name            string
 		repo            func() repository.Account
-		accountCreation *dto.AccountCreation
+		accountCreation dto.AccountCreation
 		assertErr       func(*testing.T, error)
 	}{
 		{
@@ -112,7 +112,7 @@ func TestAccountCreation(t *testing.T) {
 			v := validation.Account{
 				AccountRepository: &repo,
 			}
-			err := v.Creation(context.Background(), *tc.accountCreation)
+			err := v.Creation(context.Background(), tc.accountCreation)
 			tc.assertErr(t, err)
 		})
 	}

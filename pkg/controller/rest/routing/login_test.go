@@ -34,7 +34,7 @@ func TestRoutingLoginCreate(t *testing.T) {
 					ExpectLogin: func(c context.Context, cpf string, secret string) (dto.AccountView, error) {
 						testutil.AssertEq(t, "cpf", cpf, "00000000000")
 						testutil.AssertEq(t, "secret", secret, "pw")
-						return *testutil.NewAccountView(1, "Lucas", "00000000000", 999, time.Now()), nil
+						return testutil.NewAccountView(1, "Lucas", "00000000000", 999, time.Now()), nil
 					},
 				}
 			},

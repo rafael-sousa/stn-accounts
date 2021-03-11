@@ -2,6 +2,8 @@ package validation
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -9,6 +11,8 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/model/entity"
 	"github.com/rafael-sousa/stn-accounts/pkg/repository"
 )
+
+var _hasElevenDigits = regexp.MustCompile(`^([\d]{11})$`).MatchString
 
 // Account keeps the validation for operations related to entity.Account
 type Account struct {
@@ -64,16 +68,38 @@ func verifyName(name string) error {
 
 func verifyCPF(cpf string) error {
 	fieldName := "cpf"
-	cpfLength := len(cpf)
-	_, err := strconv.ParseUint(cpf, 10, 64)
-	switch {
-	case cpfLength == 0:
+	if len(cpf) == 0 {
 		return requiredFieldErr(fieldName)
-	case cpfLength > entity.AccountCPFSize:
-		return maxSizeErr(fieldName, entity.AccountCPFSize)
-	case cpfLength < entity.AccountCPFSize:
-		return minSizeErr(fieldName, entity.AccountCPFSize)
-	case err != nil:
+	}
+
+	if !_hasElevenDigits(cpf) {
+		return invalidFormatErr(fieldName)
+	}
+
+	runes := make(map[rune]rune, 11)
+	for _, c := range cpf {
+		runes[c] = c
+	}
+	if len(runes) == 1 {
+		return invalidFormatErr(fieldName)
+	}
+
+	var s1, s2 int
+	for i, c := range cpf[0:9] {
+		d, _ := strconv.Atoi(string(c))
+		s1 += (10 - i) * d
+		s2 += d
+	}
+	s2 += s1
+	var m1, m2 int
+	if s1%11 >= 2 {
+		m1 = 11 - s1%11
+	}
+	s2 += m1 * 2
+	if s2%11 >= 2 {
+		m2 = 11 - s2%11
+	}
+	if cpf[9:11] != fmt.Sprintf("%d%d", m1, m2) {
 		return invalidFormatErr(fieldName)
 	}
 	return nil

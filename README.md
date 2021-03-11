@@ -50,8 +50,8 @@ This section describes the steps to get a local copy up and running.
 ### Prerequisites
 
 * [Go 1.15+](https://golang.org/)
-* [Docker](https://www.docker.com/)
-* [Docker Compose](https://docs.docker.com/compose/)
+* [Docker 19+](https://www.docker.com/)
+* [Docker Compose 3.3+](https://docs.docker.com/compose/)
 
 ### Installation
 
@@ -66,7 +66,7 @@ This section describes the steps to get a local copy up and running.
    ```
 
 
-3. Once running, the swagger UI is available at: [localhost:3000/swagger/index.html](localhost:3000/swagger/index.html)
+3. Once running, the swagger UI is available at: [localhost:3000/swagger/index.html](http://localhost:3000/swagger/index.html)
    
 
 4. Stop the running API

@@ -188,15 +188,15 @@ The following table lists the direct dependencies used by the application. A com
     4. Apply the settings and wait the service restart
 
 * Error during database test execution "Could not start resource ... No connection could be made because the target machine actively refused it"
-    1. Add environment variable DOCKER_HOST a with value `tcp://127.0.0.1:2375`
+    1. Add a environment variable with name `DOCKER_HOST` and value `tcp://127.0.0.1:2375`
     2. Edit the docker agent settings
     3. On the left menu, navigate to General
     4. Check the "Expose daemon on tcp://localhost:2375 without TLS" option
 
 * Cleaning up docker containers and volume
-    1. Stop docker-compose executions: docker-compose down
-    2. Delete all containers using the following command: docker rm -f $(docker ps -a -q)
-    3. Delete all volumes using the following command:docker volume rm $(docker volume ls -q)
+    1. Stop docker-compose executions: `docker-compose down`
+    2. Delete all containers using the following command: `docker rm -f $(docker ps -a -q)`
+    3. Delete all volumes using the following command: `docker volume rm $(docker volume ls -q)`
 
 
 ## License

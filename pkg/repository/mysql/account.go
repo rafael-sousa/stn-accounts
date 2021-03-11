@@ -52,7 +52,7 @@ func (r *account) Create(ctx context.Context, e entity.Account) (insertedID int6
 	if err != nil {
 		return insertedID, types.NewErr(types.InsertStmtErr, "exec account insert stmt", err)
 	}
-	if e.ID, err = result.LastInsertId(); err != nil {
+	if insertedID, err = result.LastInsertId(); err != nil {
 		return insertedID, types.NewErr(types.InsertStmtErr, "getting the inserted account id", err)
 	}
 	return insertedID, nil

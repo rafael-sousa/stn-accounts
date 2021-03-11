@@ -16,8 +16,8 @@ type AccountView struct {
 }
 
 // NewAccountView creates a view from the entity.Account stored at e
-func NewAccountView(e *entity.Account) *AccountView {
-	return &AccountView{
+func NewAccountView(e entity.Account) AccountView {
+	return AccountView{
 		ID:        e.ID,
 		Name:      e.Name,
 		Balance:   e.Balance.Float64(),

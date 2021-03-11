@@ -16,19 +16,19 @@ type account struct {
 
 var _ repository.Account = (*account)(nil)
 
-func (r *account) Fetch(ctx context.Context) ([]*entity.Account, error) {
+func (r *account) Fetch(ctx context.Context) ([]entity.Account, error) {
 	rows, err := (*r.txr).GetConn(ctx).QueryContext(ctx, "SELECT id, name, cpf, secret, balance, created_at FROM account")
 	if err != nil {
 		return nil, types.NewErr(types.SelectStmtErr, "fetching accounts", &err)
 	}
 	defer rows.Close()
-	accs := make([]*entity.Account, 0)
+	accs := make([]entity.Account, 0)
 	for rows.Next() {
 		acc := entity.Account{}
 		if err = rows.Scan(&acc.ID, &acc.Name, &acc.CPF, &acc.Secret, &acc.Balance, &acc.CreatedAt); err != nil {
 			return nil, types.NewErr(types.SelectStmtErr, "scanning account row", &err)
 		}
-		accs = append(accs, &acc)
+		accs = append(accs, acc)
 	}
 
 	if err = rows.Err(); err != nil {
@@ -37,20 +37,20 @@ func (r *account) Fetch(ctx context.Context) ([]*entity.Account, error) {
 	return accs, nil
 }
 
-func (r *account) Create(ctx context.Context, e *entity.Account) (*entity.Account, error) {
+func (r *account) Create(ctx context.Context, e entity.Account) (insertedID int64, err error) {
 	stmt, err := (*r.txr).GetConn(ctx).PrepareContext(ctx, "INSERT INTO account(name, cpf, secret, balance, created_at) VALUES (?,?,?,?,?)")
 	if err != nil {
-		return nil, types.NewErr(types.InsertStmtErr, "preparing account insert stmt", &err)
+		return insertedID, types.NewErr(types.InsertStmtErr, "preparing account insert stmt", &err)
 	}
 	defer stmt.Close()
 	result, err := stmt.ExecContext(ctx, e.Name, e.CPF, e.Secret, e.Balance, e.CreatedAt)
 	if err != nil {
-		return nil, types.NewErr(types.InsertStmtErr, "exec account insert stmt", &err)
+		return insertedID, types.NewErr(types.InsertStmtErr, "exec account insert stmt", &err)
 	}
 	if e.ID, err = result.LastInsertId(); err != nil {
-		return nil, types.NewErr(types.InsertStmtErr, "getting the inserted account id", &err)
+		return insertedID, types.NewErr(types.InsertStmtErr, "getting the inserted account id", &err)
 	}
-	return e, nil
+	return insertedID, nil
 }
 func (r *account) GetBalance(ctx context.Context, id int64) (types.Currency, error) {
 	var balance types.Currency
@@ -64,17 +64,16 @@ func (r *account) GetBalance(ctx context.Context, id int64) (types.Currency, err
 	return balance, nil
 }
 
-func (r *account) FindBy(ctx context.Context, cpf string) (*entity.Account, error) {
-	var acc entity.Account
+func (r *account) FindBy(ctx context.Context, cpf string) (acc entity.Account, err error) {
 	q := "SELECT id, name, cpf, secret, balance, created_at FROM account WHERE cpf=?"
-	err := (*r.txr).GetConn(ctx).QueryRowContext(ctx, q, cpf).Scan(&acc.ID, &acc.Name, &acc.CPF, &acc.Secret, &acc.Balance, &acc.CreatedAt)
+	err = (*r.txr).GetConn(ctx).QueryRowContext(ctx, q, cpf).Scan(&acc.ID, &acc.Name, &acc.CPF, &acc.Secret, &acc.Balance, &acc.CreatedAt)
 	if err == sql.ErrNoRows {
-		return nil, types.NewErr(types.EmptyResultErr, "no result finding account by cpf", &err)
+		return acc, types.NewErr(types.EmptyResultErr, "no result finding account by cpf", &err)
 	}
 	if err != nil {
-		return nil, types.NewErr(types.SelectStmtErr, "finding account by cpf", &err)
+		return acc, types.NewErr(types.SelectStmtErr, "finding account by cpf", &err)
 	}
-	return &acc, nil
+	return acc, nil
 }
 
 func (r *account) UpdateBalance(ctx context.Context, id int64, balance types.Currency) error {

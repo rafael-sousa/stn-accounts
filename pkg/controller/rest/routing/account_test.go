@@ -31,8 +31,8 @@ func TestRoutingAccountFetch(t *testing.T) {
 			path:   "/",
 			service: func() service.Account {
 				return &testutil.AccountServMock{
-					ExpectFetch: func(c context.Context) ([]*dto.AccountView, error) {
-						return []*dto.AccountView{}, nil
+					ExpectFetch: func(c context.Context) ([]dto.AccountView, error) {
+						return []dto.AccountView{}, nil
 					},
 				}
 			},
@@ -43,11 +43,11 @@ func TestRoutingAccountFetch(t *testing.T) {
 			path:   "/",
 			service: func() service.Account {
 				return &testutil.AccountServMock{
-					ExpectFetch: func(c context.Context) ([]*dto.AccountView, error) {
-						return []*dto.AccountView{
-							testutil.NewAccountView(1, "Jose", "00000000000", 5, time.Now()),
-							testutil.NewAccountView(2, "Silva", "11111111111", 10, time.Now()),
-							testutil.NewAccountView(3, "Sousa", "22222222222", 20, time.Now()),
+					ExpectFetch: func(c context.Context) ([]dto.AccountView, error) {
+						return []dto.AccountView{
+							*testutil.NewAccountView(1, "Jose", "00000000000", 5, time.Now()),
+							*testutil.NewAccountView(2, "Silva", "11111111111", 10, time.Now()),
+							*testutil.NewAccountView(3, "Sousa", "22222222222", 20, time.Now()),
 						}, nil
 					},
 				}
@@ -133,8 +133,8 @@ func TestRoutingAccountCreate(t *testing.T) {
 			path:   "/",
 			service: func() service.Account {
 				return &testutil.AccountServMock{
-					ExpectCreate: func(c context.Context, ac *dto.AccountCreation) (*dto.AccountView, error) {
-						return testutil.NewAccountView(4, "Garcia", "33333333333", 25, time.Now()), nil
+					ExpectCreate: func(c context.Context, ac dto.AccountCreation) (dto.AccountView, error) {
+						return *testutil.NewAccountView(4, "Garcia", "33333333333", 25, time.Now()), nil
 					},
 				}
 			},

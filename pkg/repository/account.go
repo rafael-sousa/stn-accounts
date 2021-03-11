@@ -11,10 +11,10 @@ import (
 
 // Account exposes database operations related to account domain
 type Account interface {
-	Fetch(ctx context.Context) ([]*entity.Account, error)
-	Create(ctx context.Context, e *entity.Account) (*entity.Account, error)
+	Fetch(ctx context.Context) ([]entity.Account, error)
+	Create(ctx context.Context, e entity.Account) (int64, error)
 	GetBalance(ctx context.Context, id int64) (types.Currency, error)
-	FindBy(ctx context.Context, cpf string) (*entity.Account, error)
+	FindBy(ctx context.Context, cpf string) (entity.Account, error)
 	Exists(ctx context.Context, id int64) (bool, error)
 	UpdateBalance(ctx context.Context, id int64, b types.Currency) error
 }

@@ -20,7 +20,7 @@ type Account struct {
 }
 
 // Creation validates the creation of a new entity.Account
-func (v *Account) Creation(ctx context.Context, accountCreation *dto.AccountCreation) error {
+func (v *Account) Creation(ctx context.Context, accountCreation dto.AccountCreation) error {
 	if err := verifyName(accountCreation.Name); err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (v *Account) Creation(ctx context.Context, accountCreation *dto.AccountCrea
 		return greaterOrEqualErr("balance", 0)
 	}
 
-	if account, err := (*v.AccountRepository).FindBy(ctx, accountCreation.CPF); account != nil && err == nil {
+	if _, err := (*v.AccountRepository).FindBy(ctx, accountCreation.CPF); err == nil {
 		return uniqErr("cpf", accountCreation.CPF)
 	}
 

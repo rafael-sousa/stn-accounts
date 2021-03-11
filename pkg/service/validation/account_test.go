@@ -23,8 +23,8 @@ func TestAccountCreation(t *testing.T) {
 			name: "validate account creation successfully",
 			repo: func() repository.Account {
 				return &testutil.AccountRepoMock{
-					ExpectFindBy: func(c context.Context, cpf string) (*entity.Account, error) {
-						return nil, nil
+					ExpectFindBy: func(c context.Context, cpf string) (entity.Account, error) {
+						return entity.Account{}, types.NewErr(types.EmptyResultErr, "EmptyResultErr", nil)
 					},
 				}
 			},
@@ -95,8 +95,8 @@ func TestAccountCreation(t *testing.T) {
 			name: "validate account creation with existing cpf",
 			repo: func() repository.Account {
 				return &testutil.AccountRepoMock{
-					ExpectFindBy: func(c context.Context, s string) (*entity.Account, error) {
-						return &entity.Account{}, nil
+					ExpectFindBy: func(c context.Context, s string) (entity.Account, error) {
+						return entity.Account{}, nil
 					},
 				}
 			},
@@ -112,7 +112,7 @@ func TestAccountCreation(t *testing.T) {
 			v := validation.Account{
 				AccountRepository: &repo,
 			}
-			err := v.Creation(context.Background(), tc.accountCreation)
+			err := v.Creation(context.Background(), *tc.accountCreation)
 			tc.assertErr(t, err)
 		})
 	}

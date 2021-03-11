@@ -147,7 +147,7 @@ func TestTransferCreation(t *testing.T) {
 			v := validation.Transfer{
 				AccountRepository: &repo,
 			}
-			err := v.Creation(context.Background(), tc.origin, tc.transferCreation)
+			err := v.Creation(context.Background(), tc.origin, *tc.transferCreation)
 			tc.assertErr(t, err)
 		})
 	}

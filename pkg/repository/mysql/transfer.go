@@ -14,20 +14,20 @@ type transfer struct {
 
 var _ repository.Transfer = (*transfer)(nil)
 
-func (r *transfer) Fetch(ctx context.Context, origin int64) ([]*entity.Transfer, error) {
+func (r *transfer) Fetch(ctx context.Context, origin int64) ([]entity.Transfer, error) {
 	rows, err := (*r.txr).GetConn(ctx).QueryContext(ctx, "SELECT id, account_origin_id, account_destination_id, amount, created_at FROM transfer WHERE account_origin_id=?", origin)
 	if err != nil {
 		return nil, types.NewErr(types.SelectStmtErr, "querying transfers by id", &err)
 	}
 	defer rows.Close()
-	transfers := make([]*entity.Transfer, 0)
+	transfers := make([]entity.Transfer, 0)
 	for rows.Next() {
 		transfer := entity.Transfer{}
 		err = rows.Scan(&transfer.ID, &transfer.Origin, &transfer.Destination, &transfer.Amount, &transfer.CreatedAt)
 		if err != nil {
 			return nil, types.NewErr(types.SelectStmtErr, "scanning the transfer row", &err)
 		}
-		transfers = append(transfers, &transfer)
+		transfers = append(transfers, transfer)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, types.NewErr(types.SelectStmtErr, "iterating over the transfer rows", &err)
@@ -35,20 +35,21 @@ func (r *transfer) Fetch(ctx context.Context, origin int64) ([]*entity.Transfer,
 	return transfers, nil
 
 }
-func (r *transfer) Create(ctx context.Context, transfer *entity.Transfer) (*entity.Transfer, error) {
+func (r *transfer) Create(ctx context.Context, transfer entity.Transfer) (insertedID int64, err error) {
 	stmt, err := (*r.txr).GetConn(ctx).PrepareContext(ctx, "INSERT INTO transfer(account_origin_id, account_destination_id, amount, created_at) VALUES (?,?,?,?)")
 	if err != nil {
-		return nil, types.NewErr(types.SelectStmtErr, "preparing transfer insert stmt", &err)
+		return insertedID, types.NewErr(types.SelectStmtErr, "preparing transfer insert stmt", &err)
 	}
 	defer stmt.Close()
 	result, err := stmt.ExecContext(ctx, transfer.Origin, transfer.Destination, transfer.Amount, transfer.CreatedAt)
 	if err != nil {
-		return nil, types.NewErr(types.SelectStmtErr, "exec transfer insert stmt", &err)
+		return insertedID, types.NewErr(types.SelectStmtErr, "exec transfer insert stmt", &err)
 	}
-	if transfer.ID, err = result.LastInsertId(); err != nil {
-		return nil, types.NewErr(types.SelectStmtErr, "getting the inserted transfer id", &err)
+	if insertedID, err = result.LastInsertId(); err != nil {
+		return insertedID, types.NewErr(types.SelectStmtErr, "getting the inserted transfer id", &err)
 	}
-	return transfer, nil
+	return insertedID, nil
+
 }
 
 // NewTransfer creates a value that satisfies the repository.Transfer interface

@@ -85,7 +85,7 @@ func (h *accountHandler) post(w http.ResponseWriter, r *http.Request) {
 		response.WriteErr(w, r, nil)
 		return
 	}
-	view, err := (*h.accountSrv).Create(r.Context(), &accountCreation)
+	view, err := (*h.accountSrv).Create(r.Context(), accountCreation)
 	if err != nil {
 		response.WriteErr(w, r, err)
 		return

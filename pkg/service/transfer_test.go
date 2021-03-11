@@ -26,9 +26,9 @@ func TestTransferServiceFetch(t *testing.T) {
 			expectedSize: 0,
 			transferRepo: func(id int64) repository.Transfer {
 				return &testutil.TransferRepoMock{
-					ExpectFetch: func(ctx context.Context, currentID int64) ([]*entity.Transfer, error) {
+					ExpectFetch: func(ctx context.Context, currentID int64) ([]entity.Transfer, error) {
 						testutil.AssertEq(t, "id", id, currentID)
-						return []*entity.Transfer{}, nil
+						return []entity.Transfer{}, nil
 					},
 				}
 			},
@@ -42,7 +42,7 @@ func TestTransferServiceFetch(t *testing.T) {
 			expectedSize: 0,
 			transferRepo: func(id int64) repository.Transfer {
 				return &testutil.TransferRepoMock{
-					ExpectFetch: func(ctx context.Context, currentID int64) ([]*entity.Transfer, error) {
+					ExpectFetch: func(ctx context.Context, currentID int64) ([]entity.Transfer, error) {
 						return nil, types.NewErr(types.InternalErr, "internal error", nil)
 					},
 				}
@@ -60,14 +60,14 @@ func TestTransferServiceFetch(t *testing.T) {
 			expectedSize: 5,
 			transferRepo: func(id int64) repository.Transfer {
 				return &testutil.TransferRepoMock{
-					ExpectFetch: func(ctx context.Context, currentID int64) ([]*entity.Transfer, error) {
+					ExpectFetch: func(ctx context.Context, currentID int64) ([]entity.Transfer, error) {
 						testutil.AssertEq(t, "id", id, currentID)
-						return []*entity.Transfer{
-							testutil.NewEntityTransfer(1, 3, 2, 10),
-							testutil.NewEntityTransfer(2, 3, 2, 20),
-							testutil.NewEntityTransfer(3, 3, 2, 30),
-							testutil.NewEntityTransfer(4, 3, 3, 40),
-							testutil.NewEntityTransfer(5, 3, 3, 50),
+						return []entity.Transfer{
+							*testutil.NewEntityTransfer(1, 3, 2, 10),
+							*testutil.NewEntityTransfer(2, 3, 2, 20),
+							*testutil.NewEntityTransfer(3, 3, 2, 30),
+							*testutil.NewEntityTransfer(4, 3, 3, 40),
+							*testutil.NewEntityTransfer(5, 3, 3, 50),
 						}, nil
 					},
 				}
@@ -111,13 +111,12 @@ func TestTransferServiceCreate(t *testing.T) {
 			name: "create transfer successfully",
 			transferRepo: func(origin int64, d *dto.TransferCreation) repository.Transfer {
 				return &testutil.TransferRepoMock{
-					ExpectCreate: func(ctx context.Context, e *entity.Transfer) (*entity.Transfer, error) {
+					ExpectCreate: func(ctx context.Context, e entity.Transfer) (int64, error) {
 						testutil.AssertEq(t, "origin", origin, e.Origin)
 						testutil.AssertEq(t, "destination", d.Destination, e.Destination)
 						testutil.AssertEq(t, "amount", types.NewCurrency(d.Amount), e.Amount)
 						testutil.AssertNotDefault(t, "created_at", e.CreatedAt)
-						e.ID = 1
-						return e, nil
+						return int64(1), nil
 					},
 				}
 			},
@@ -343,7 +342,7 @@ func TestTransferServiceCreate(t *testing.T) {
 			transferRepo := tc.transferRepo(tc.origin, tc.d)
 			accRepo := tc.accountRepo(tc.origin, tc.d)
 			s := service.NewTransfer(&txr, &transferRepo, &accRepo)
-			view, err := s.Create(context.Background(), tc.origin, tc.d)
+			view, err := s.Create(context.Background(), tc.origin, *tc.d)
 			if err == nil && tc.assertErr == nil {
 				testutil.AssertNotDefault(t, "id", view.ID)
 				testutil.AssertEq(t, "amount", tc.d.Amount, view.Amount)

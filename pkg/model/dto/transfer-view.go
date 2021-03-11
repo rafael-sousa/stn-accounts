@@ -15,8 +15,8 @@ type TransferView struct {
 }
 
 // NewTransferView creates a view from the entity.Transfer stored at e
-func NewTransferView(e *entity.Transfer) *TransferView {
-	return &TransferView{
+func NewTransferView(e entity.Transfer) TransferView {
+	return TransferView{
 		ID:          e.ID,
 		Destination: e.Destination,
 		Amount:      e.Amount.Float64(),

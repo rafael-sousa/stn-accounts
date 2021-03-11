@@ -31,10 +31,10 @@ func TestRoutingLoginCreate(t *testing.T) {
 			status: http.StatusOK,
 			service: func() service.Account {
 				return &testutil.AccountServMock{
-					ExpectLogin: func(c context.Context, cpf string, secret string) (*dto.AccountView, error) {
+					ExpectLogin: func(c context.Context, cpf string, secret string) (dto.AccountView, error) {
 						testutil.AssertEq(t, "cpf", cpf, "00000000000")
 						testutil.AssertEq(t, "secret", secret, "pw")
-						return testutil.NewAccountView(1, "Lucas", "00000000000", 999, time.Now()), nil
+						return *testutil.NewAccountView(1, "Lucas", "00000000000", 999, time.Now()), nil
 					},
 				}
 			},
@@ -70,8 +70,8 @@ func TestRoutingLoginCreate(t *testing.T) {
 			status: http.StatusBadRequest,
 			service: func() service.Account {
 				return &testutil.AccountServMock{
-					ExpectLogin: func(c context.Context, s1, s2 string) (*dto.AccountView, error) {
-						return nil, types.NewErr(types.ValidationErr, "ValidationErr", nil)
+					ExpectLogin: func(c context.Context, s1, s2 string) (dto.AccountView, error) {
+						return dto.AccountView{}, types.NewErr(types.ValidationErr, "ValidationErr", nil)
 					},
 				}
 			},

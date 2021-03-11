@@ -24,21 +24,21 @@ func (manager *TransactionerMock) GetConn(ctx context.Context) repository.Connec
 
 // AccountRepoMock mock structure for repository.Account interface
 type AccountRepoMock struct {
-	ExpectFetch         func(context.Context) ([]*entity.Account, error)
-	ExpectCreate        func(context.Context, *entity.Account) (*entity.Account, error)
+	ExpectFetch         func(context.Context) ([]entity.Account, error)
+	ExpectCreate        func(context.Context, entity.Account) (int64, error)
 	ExpectGetBalance    func(context.Context, int64) (types.Currency, error)
-	ExpectFindBy        func(context.Context, string) (*entity.Account, error)
+	ExpectFindBy        func(context.Context, string) (entity.Account, error)
 	ExpectUpdateBalance func(context.Context, int64, types.Currency) error
 	ExpectExists        func(context.Context, int64) (bool, error)
 }
 
 // Fetch mocks the functionality of repository.Account#Fetch
-func (r *AccountRepoMock) Fetch(ctx context.Context) ([]*entity.Account, error) {
+func (r *AccountRepoMock) Fetch(ctx context.Context) ([]entity.Account, error) {
 	return r.ExpectFetch(ctx)
 }
 
 // Create mocks the functionality of repository.Account#Create
-func (r *AccountRepoMock) Create(ctx context.Context, e *entity.Account) (*entity.Account, error) {
+func (r *AccountRepoMock) Create(ctx context.Context, e entity.Account) (int64, error) {
 	return r.ExpectCreate(ctx, e)
 }
 
@@ -48,7 +48,7 @@ func (r *AccountRepoMock) GetBalance(ctx context.Context, id int64) (types.Curre
 }
 
 // FindBy mocks the functionality of repository.Account#FindBy
-func (r *AccountRepoMock) FindBy(ctx context.Context, cpf string) (*entity.Account, error) {
+func (r *AccountRepoMock) FindBy(ctx context.Context, cpf string) (entity.Account, error) {
 	return r.ExpectFindBy(ctx, cpf)
 }
 
@@ -64,31 +64,31 @@ func (r *AccountRepoMock) Exists(ctx context.Context, id int64) (bool, error) {
 
 // TransferRepoMock mocks the repository.Transfer interface
 type TransferRepoMock struct {
-	ExpectFetch  func(ctx context.Context, id int64) ([]*entity.Transfer, error)
-	ExpectCreate func(ctx context.Context, e *entity.Transfer) (*entity.Transfer, error)
+	ExpectFetch  func(ctx context.Context, id int64) ([]entity.Transfer, error)
+	ExpectCreate func(ctx context.Context, e entity.Transfer) (int64, error)
 }
 
 // Fetch mocks the functionality of repository.Transfer#Fetch
-func (r *TransferRepoMock) Fetch(ctx context.Context, id int64) ([]*entity.Transfer, error) {
+func (r *TransferRepoMock) Fetch(ctx context.Context, id int64) ([]entity.Transfer, error) {
 	return r.ExpectFetch(ctx, id)
 
 }
 
 // Create mocks the functionality of repository.Transfer#Create
-func (r *TransferRepoMock) Create(ctx context.Context, e *entity.Transfer) (*entity.Transfer, error) {
+func (r *TransferRepoMock) Create(ctx context.Context, e entity.Transfer) (int64, error) {
 	return r.ExpectCreate(ctx, e)
 }
 
 // AccountServMock mocks the service.Account interface
 type AccountServMock struct {
-	ExpectFetch      func(context.Context) ([]*dto.AccountView, error)
+	ExpectFetch      func(context.Context) ([]dto.AccountView, error)
 	ExpectGetBalance func(context.Context, int64) (float64, error)
-	ExpectCreate     func(context.Context, *dto.AccountCreation) (*dto.AccountView, error)
-	ExpectLogin      func(context.Context, string, string) (*dto.AccountView, error)
+	ExpectCreate     func(context.Context, dto.AccountCreation) (dto.AccountView, error)
+	ExpectLogin      func(context.Context, string, string) (dto.AccountView, error)
 }
 
 // Fetch mocks the functionality of service.Account#Fetch
-func (s *AccountServMock) Fetch(ctx context.Context) ([]*dto.AccountView, error) {
+func (s *AccountServMock) Fetch(ctx context.Context) ([]dto.AccountView, error) {
 	return s.ExpectFetch(ctx)
 }
 
@@ -98,27 +98,27 @@ func (s *AccountServMock) GetBalance(ctx context.Context, id int64) (float64, er
 }
 
 // Create mocks the functionality of service.Account#Create
-func (s *AccountServMock) Create(ctx context.Context, d *dto.AccountCreation) (*dto.AccountView, error) {
+func (s *AccountServMock) Create(ctx context.Context, d dto.AccountCreation) (dto.AccountView, error) {
 	return s.ExpectCreate(ctx, d)
 }
 
 // Login mocks the functionality of service.Account#Login
-func (s *AccountServMock) Login(ctx context.Context, cpf string, secret string) (*dto.AccountView, error) {
+func (s *AccountServMock) Login(ctx context.Context, cpf string, secret string) (dto.AccountView, error) {
 	return s.ExpectLogin(ctx, cpf, secret)
 }
 
 // TransferServMock mocks the service.Transfer interface
 type TransferServMock struct {
-	ExpectFetch  func(context.Context, int64) ([]*dto.TransferView, error)
-	ExpectCreate func(context.Context, int64, *dto.TransferCreation) (*dto.TransferView, error)
+	ExpectFetch  func(context.Context, int64) ([]dto.TransferView, error)
+	ExpectCreate func(context.Context, int64, dto.TransferCreation) (dto.TransferView, error)
 }
 
 // Fetch mocks the functionality of service.Transfer#Fetch
-func (s *TransferServMock) Fetch(ctx context.Context, id int64) ([]*dto.TransferView, error) {
+func (s *TransferServMock) Fetch(ctx context.Context, id int64) ([]dto.TransferView, error) {
 	return s.ExpectFetch(ctx, id)
 }
 
 // Create mocks the functionality of service.Transfer#Create
-func (s *TransferServMock) Create(ctx context.Context, origin int64, d *dto.TransferCreation) (*dto.TransferView, error) {
+func (s *TransferServMock) Create(ctx context.Context, origin int64, d dto.TransferCreation) (dto.TransferView, error) {
 	return s.ExpectCreate(ctx, origin, d)
 }

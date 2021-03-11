@@ -39,8 +39,8 @@ func TestAccountRepositoryFetch(t *testing.T) {
 				testutil.AssertEq(t, "result size", len(tc.input), len(accs))
 				for _, acc := range accs {
 					if expected, ok := entities[acc.ID]; ok {
-						if !reflect.DeepEqual(*expected, *acc) {
-							t.Errorf("expected result content equal to '%v' but got '%v'", *expected, *acc)
+						if !reflect.DeepEqual(*expected, acc) {
+							t.Errorf("expected result content equal to '%v' but got '%v'", *expected, acc)
 						}
 					} else {
 						t.Errorf("unexpected account id '%d'", acc.ID)
@@ -75,11 +75,11 @@ func TestAccountRepositoryCreate(t *testing.T) {
 			t.Cleanup(dbWipe)
 			var err error
 			for _, e := range tc.input {
-				if _, err = repo.Create(context.Background(), e); err == nil {
+				if id, err := repo.Create(context.Background(), *e); err == nil {
 					current := entity.Account{}
-					row := db.QueryRow("SELECT id, name, cpf, secret, balance, created_at FROM account WHERE id=?", e.ID)
-					if err = row.Scan(&current.ID, &current.Name, &current.CPF, &current.Secret, &current.Balance, &current.CreatedAt); err == nil {
-						if !reflect.DeepEqual(*e, current) {
+					row := db.QueryRow("SELECT name, cpf, secret, balance, created_at FROM account WHERE id=?", id)
+					if err = row.Scan(&current.Name, &current.CPF, &current.Secret, &current.Balance, &current.CreatedAt); err == nil {
+						if !reflect.DeepEqual(e, current) {
 							t.Errorf("expected new account equal to '%v' but got '%v'", *e, current)
 						}
 					}
@@ -125,9 +125,7 @@ func TestAccountRepositoryGetBalance(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.prepare(t, tc.input)
 			if b, err := repo.GetBalance(context.Background(), tc.input.ID); err == nil {
-				if b != tc.input.Balance {
-					t.Errorf("expected balance equal to '%d' but got '%d'", tc.input.Balance, b)
-				}
+				testutil.AssertEq(t, "acc balance", tc.input.Balance, b)
 			} else {
 				tc.assert(t, err)
 			}
@@ -168,8 +166,8 @@ func TestAccountRepositoryFindBy(t *testing.T) {
 			tc.prepare(t, tc.input)
 			if e, err := repo.FindBy(context.Background(), tc.input.CPF); err == nil {
 
-				if !reflect.DeepEqual(*tc.input, *e) {
-					t.Errorf("expected account equal to '%v' but got '%v'", *tc.input, *e)
+				if !reflect.DeepEqual(*tc.input, e) {
+					t.Errorf("expected account equal to '%v' but got '%v'", *tc.input, e)
 				}
 			} else {
 				tc.assert(t, err)
@@ -221,9 +219,7 @@ func TestAccountRepositoryUpdateBalance(t *testing.T) {
 			if err := repo.UpdateBalance(context.Background(), tc.input.ID, tc.expectedBalance); err == nil {
 
 				if b, err := getCurrentAccBalance(tc.input.ID); err == nil {
-					if b != tc.expectedBalance {
-						t.Errorf("expected updated account balance equal to '%v' but got '%v'", tc.expectedBalance, b)
-					}
+					testutil.AssertEq(t, "updated balance", tc.expectedBalance, b)
 				} else {
 					t.Error(err)
 				}

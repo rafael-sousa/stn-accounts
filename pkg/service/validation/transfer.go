@@ -15,7 +15,7 @@ type Transfer struct {
 }
 
 // Creation validates the creation of a new entity.Transfer
-func (v *Transfer) Creation(ctx context.Context, origin int64, transferCreation *dto.TransferCreation) error {
+func (v *Transfer) Creation(ctx context.Context, origin int64, transferCreation dto.TransferCreation) error {
 	if transferCreation.Amount <= 0 {
 		return greaterThanErr("amount", 0)
 	}

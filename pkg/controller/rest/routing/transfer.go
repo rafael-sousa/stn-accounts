@@ -73,7 +73,7 @@ func (h *transferHandler) post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view, err := (*h.transferSrv).Create(r.Context(), id, &transferCreation)
+	view, err := (*h.transferSrv).Create(r.Context(), id, transferCreation)
 	if err != nil {
 		response.WriteErr(w, r, err)
 		return

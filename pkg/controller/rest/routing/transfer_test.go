@@ -39,9 +39,9 @@ func TestRoutingTransferFetch(t *testing.T) {
 			path:   "/",
 			service: func() service.Transfer {
 				return &testutil.TransferServMock{
-					ExpectFetch: func(c context.Context, i int64) ([]*dto.TransferView, error) {
+					ExpectFetch: func(c context.Context, i int64) ([]dto.TransferView, error) {
 						testutil.AssertEq(t, "id", int64(1), i)
-						return []*dto.TransferView{}, nil
+						return []dto.TransferView{}, nil
 					},
 				}
 			},
@@ -55,12 +55,12 @@ func TestRoutingTransferFetch(t *testing.T) {
 			path:   "/",
 			service: func() service.Transfer {
 				return &testutil.TransferServMock{
-					ExpectFetch: func(c context.Context, i int64) ([]*dto.TransferView, error) {
+					ExpectFetch: func(c context.Context, i int64) ([]dto.TransferView, error) {
 						testutil.AssertEq(t, "id", int64(1), i)
-						return []*dto.TransferView{
-							testutil.NewTransferView(1, 2, 5),
-							testutil.NewTransferView(2, 2, 10),
-							testutil.NewTransferView(3, 2, 20),
+						return []dto.TransferView{
+							*testutil.NewTransferView(1, 2, 5),
+							*testutil.NewTransferView(2, 2, 10),
+							*testutil.NewTransferView(3, 2, 20),
 						}, nil
 					},
 				}
@@ -112,11 +112,11 @@ func TestRoutingTransferCreate(t *testing.T) {
 			path:   "/",
 			service: func() service.Transfer {
 				return &testutil.TransferServMock{
-					ExpectCreate: func(c context.Context, i int64, d *dto.TransferCreation) (*dto.TransferView, error) {
+					ExpectCreate: func(c context.Context, i int64, d dto.TransferCreation) (dto.TransferView, error) {
 						testutil.AssertEq(t, "id", int64(1), i)
 						testutil.AssertEq(t, "destination", int64(2), d.Destination)
 						testutil.AssertEq(t, "amount", float64(500), d.Amount)
-						return testutil.NewTransferView(1, d.Destination, d.Amount), nil
+						return *testutil.NewTransferView(1, d.Destination, d.Amount), nil
 					},
 				}
 			},

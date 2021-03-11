@@ -14,8 +14,8 @@ import (
 
 // Transfer represents the business operations available to entity.Transfer type
 type Transfer interface {
-	Fetch(ctx context.Context, id int64) ([]*dto.TransferView, error)
-	Create(ctx context.Context, origin int64, d *dto.TransferCreation) (*dto.TransferView, error)
+	Fetch(ctx context.Context, id int64) ([]dto.TransferView, error)
+	Create(ctx context.Context, origin int64, d dto.TransferCreation) (dto.TransferView, error)
 }
 
 type transfer struct {
@@ -27,14 +27,14 @@ type transfer struct {
 
 // Fetch returns a list of entity.Transfer from the entity.Account stored at id.
 // It returns nil and an error in when not able to fetch the rows from the repository
-func (s *transfer) Fetch(ctx context.Context, id int64) ([]*dto.TransferView, error) {
+func (s *transfer) Fetch(ctx context.Context, id int64) ([]dto.TransferView, error) {
 	transfers, err := (*s.transferRepository).Fetch(ctx, id)
 	if err != nil {
 		log.Error().Caller().Err(err).Int64("id", id).Msg("unable to fetch transfers")
 		return nil, err
 	}
 
-	views := make([]*dto.TransferView, 0, len(transfers))
+	views := make([]dto.TransferView, 0, len(transfers))
 	for _, t := range transfers {
 		views = append(views, dto.NewTransferView(t))
 	}
@@ -42,9 +42,9 @@ func (s *transfer) Fetch(ctx context.Context, id int64) ([]*dto.TransferView, er
 }
 
 // Create validates, create, and persists an entity.Transfer from the values stored at d
-func (s *transfer) Create(ctx context.Context, origin int64, transferCreation *dto.TransferCreation) (*dto.TransferView, error) {
-	var transfer *entity.Transfer
-	err := (*s.txr).WithTx(ctx, func(txCtx context.Context) error {
+func (s *transfer) Create(ctx context.Context, origin int64, transferCreation dto.TransferCreation) (view dto.TransferView, err error) {
+	var transfer entity.Transfer
+	err = (*s.txr).WithTx(ctx, func(txCtx context.Context) error {
 		if err := s.transferValidator.Creation(txCtx, origin, transferCreation); err != nil {
 			return err
 		}
@@ -83,13 +83,14 @@ func (s *transfer) Create(ctx context.Context, origin int64, transferCreation *d
 				Msg("unable to update the destination account balance")
 			return err
 		}
-		transfer, err = (*s.transferRepository).Create(txCtx, &entity.Transfer{
+		transfer = entity.Transfer{
 			Origin:      origin,
 			Destination: transferCreation.Destination,
 			Amount:      amount,
 			CreatedAt:   time.Now(),
-		})
-
+		}
+		id, err := (*s.transferRepository).Create(txCtx, transfer)
+		transfer.ID = id
 		return err
 	})
 	if err != nil {
@@ -100,7 +101,7 @@ func (s *transfer) Create(ctx context.Context, origin int64, transferCreation *d
 			Int64("account_destination_id", transferCreation.Destination).
 			Int64("amount", int64(transferCreation.Amount)).
 			Msg("unable to transfer the currency amount")
-		return nil, err
+		return view, err
 	}
 	return dto.NewTransferView(transfer), nil
 }

@@ -68,12 +68,12 @@ func TestTransferRepositoryCreate(t *testing.T) {
 	tt := []struct {
 		name         string
 		expectedSize int64
-		prepare      func(*testing.T) *entity.Transfer
+		prepare      func(*testing.T) entity.Transfer
 	}{
 		{
 			name:         "create transfer successfully",
 			expectedSize: 1,
-			prepare: func(t *testing.T) *entity.Transfer {
+			prepare: func(t *testing.T) entity.Transfer {
 				t.Cleanup(dbWipe)
 
 				result, err := db.Exec("INSERT INTO account(name,cpf,secret,balance,created_at) VALUES ('John','99999999999','pw',100,'2100-12-31')")
@@ -88,7 +88,7 @@ func TestTransferRepositoryCreate(t *testing.T) {
 				destination, err := result.LastInsertId()
 				logFatal(err, "unable to retrieve inserted id")
 
-				return &entity.Transfer{
+				return entity.Transfer{
 					Origin:      origin,
 					Destination: destination,
 					Amount:      types.NewCurrency(5),
@@ -100,9 +100,13 @@ func TestTransferRepositoryCreate(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 			e := tc.prepare(t)
-			if transfer, err := repo.Create(context.Background(), e); err == nil {
-				if !reflect.DeepEqual(e, transfer) {
-					t.Errorf("expected new transfer equal to '%v' but got '%v'", e, transfer)
+			if id, err := repo.Create(context.Background(), e); err == nil {
+				current := entity.Transfer{}
+				row := db.QueryRow("SELECT amount, destination, origin, created_at FROM account WHERE id=?", id)
+				if err = row.Scan(&current.Amount, &current.Destination, &current.Origin, &current.CreatedAt); err == nil {
+					if !reflect.DeepEqual(e, current) {
+						t.Errorf("expected new account equal to '%v' but got '%v'", e, current)
+					}
 				}
 			} else {
 				t.Error(err)

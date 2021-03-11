@@ -66,10 +66,8 @@ This section describes the steps to get a local copy up and running.
    ```
 
 
-3. Once running, the swagger UI is available at
-   ```
-   localhost:3000/swagger/index.html
-   ```
+3. Once running, the swagger UI is available at: [localhost:3000/swagger/index.html](localhost:3000/swagger/index.html)
+   
 
 4. Stop the running API
    ```sh

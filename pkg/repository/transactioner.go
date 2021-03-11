@@ -32,7 +32,7 @@ func (txr *transactioner) WithTx(ctx context.Context, fn func(context.Context) e
 	if ctxTx == nil {
 		ctxTx, err = txr.db.BeginTx(ctx, nil)
 		if err != nil {
-			return types.NewErr(types.InternalErr, "unable to begin tx", &err)
+			return types.NewErr(types.InternalErr, "unable to begin tx", err)
 		}
 		ctx = context.WithValue(ctx, CtxTxKey, ctxTx)
 	}

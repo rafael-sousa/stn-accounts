@@ -51,7 +51,7 @@ func (h *Handler) Parse(tokenString string) (*jwtgo.StandardClaims, error) {
 		}
 	}
 	if err != nil || !token.Valid {
-		return nil, types.NewErr(types.AuthenticationErr, "unexpected token format", &err)
+		return nil, types.NewErr(types.AuthenticationErr, "unexpected token format", err)
 	}
 	return claims, nil
 }

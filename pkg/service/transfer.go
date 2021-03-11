@@ -25,6 +25,18 @@ type transfer struct {
 	transferValidator  *validation.Transfer
 }
 
+// NewTransfer returns a value responsible for managing entity.Transfer integrity
+func NewTransfer(txr *repository.Transactioner, transferRepository *repository.Transfer, accountRepository *repository.Account) Transfer {
+	return &transfer{
+		transferRepository: transferRepository,
+		accountRepository:  accountRepository,
+		txr:                txr,
+		transferValidator: &validation.Transfer{
+			AccountRepository: accountRepository,
+		},
+	}
+}
+
 // Fetch returns a list of entity.Transfer from the entity.Account stored at id.
 // It returns nil and an error in when not able to fetch the rows from the repository
 func (s *transfer) Fetch(ctx context.Context, id int64) ([]dto.TransferView, error) {
@@ -104,16 +116,4 @@ func (s *transfer) Create(ctx context.Context, origin int64, transferCreation dt
 		return view, err
 	}
 	return dto.NewTransferView(transfer), nil
-}
-
-// NewTransfer returns a value responsible for managing entity.Transfer integrity
-func NewTransfer(txr *repository.Transactioner, transferRepository *repository.Transfer, accountRepository *repository.Account) Transfer {
-	return &transfer{
-		transferRepository: transferRepository,
-		accountRepository:  accountRepository,
-		txr:                txr,
-		transferValidator: &validation.Transfer{
-			AccountRepository: accountRepository,
-		},
-	}
 }

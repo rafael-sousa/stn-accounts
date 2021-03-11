@@ -32,6 +32,15 @@ type Err struct {
 
 var _ zerolog.LogObjectMarshaler = (*Err)(nil)
 
+// NewErr returns a Err types with the given parameters
+func NewErr(c ErrCode, msg string, err error) error {
+	return &Err{
+		Code:  c,
+		Msg:   msg,
+		Cause: &err,
+	}
+}
+
 // MarshalZerologObject appends the current error values to zerolog event logger
 func (e *Err) MarshalZerologObject(evt *zerolog.Event) {
 	evt.Str("code", string(e.Code)).Str("msg", e.Msg)
@@ -47,13 +56,4 @@ func (e *Err) Error() string {
 		return fmt.Sprintf("%s: %s", e.Code, e.Msg)
 	}
 	return fmt.Sprintf("%s: %s, %v", e.Code, e.Msg, *e.Cause)
-}
-
-// NewErr returns a Err types with the given parameters
-func NewErr(c ErrCode, msg string, err *error) *Err {
-	return &Err{
-		Code:  c,
-		Msg:   msg,
-		Cause: err,
-	}
 }

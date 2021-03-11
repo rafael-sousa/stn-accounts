@@ -29,8 +29,20 @@ type account struct {
 	txr               *repository.Transactioner
 }
 
+// NewAccount returns a value responsible for managing entity.Account actions and integrity
+func NewAccount(txr *repository.Transactioner, accountRepository *repository.Account) Account {
+	return &account{
+		accountRepository: accountRepository,
+		txr:               txr,
+		accountValidator: &validation.Account{
+			AccountRepository: accountRepository,
+		},
+	}
+}
+
 // Fetch returns a list of dto.AccountView
 func (srv *account) Fetch(ctx context.Context) ([]dto.AccountView, error) {
+	(*srv.accountRepository).Fetch(ctx)
 	accounts, err := (*srv.accountRepository).Fetch(ctx)
 	if err != nil {
 		log.Error().Caller().Err(err).Msg("unable to fetch accounts")
@@ -88,7 +100,7 @@ func (srv *account) Create(ctx context.Context, accountCreation dto.AccountCreat
 }
 
 // Login is responsible for fetching an account, comparing the secret, and returning the respective account view.
-// It returns nil and an err if the account is not found or the provided secret doesn't match the account
+// It returns zero'd view and an err if the account is not found or the provided secret doesn't match the account
 func (srv *account) Login(ctx context.Context, cpf string, secret string) (view dto.AccountView, err error) {
 	err = srv.accountValidator.Login(cpf, secret)
 	if err != nil {
@@ -97,7 +109,7 @@ func (srv *account) Login(ctx context.Context, cpf string, secret string) (view 
 
 	account, err := (*srv.accountRepository).FindBy(ctx, cpf)
 	if customErr, ok := err.(*types.Err); ok && customErr.Code == types.EmptyResultErr {
-		return view, types.NewErr(types.AuthenticationErr, "account with the given cpf does not exist", &err)
+		return view, types.NewErr(types.AuthenticationErr, "account with the given cpf does not exist", err)
 	}
 	if err != nil {
 		log.Info().Caller().Err(err).Str("cpf", cpf).Msg("unable to find the account entity via cpf")
@@ -106,18 +118,7 @@ func (srv *account) Login(ctx context.Context, cpf string, secret string) (view 
 
 	err = bcrypt.CompareHashAndPassword([]byte(account.Secret), []byte(secret))
 	if err != nil {
-		return view, types.NewErr(types.AuthenticationErr, "the provided secret doesn't match the account's secret", &err)
+		return view, types.NewErr(types.AuthenticationErr, "the provided secret doesn't match the account's secret", err)
 	}
 	return dto.NewAccountView(account), nil
-}
-
-// NewAccount returns a value responsible for managing entity.Account actions and integrity
-func NewAccount(txr *repository.Transactioner, accountRepository *repository.Account) Account {
-	return &account{
-		accountRepository: accountRepository,
-		txr:               txr,
-		accountValidator: &validation.Account{
-			AccountRepository: accountRepository,
-		},
-	}
 }

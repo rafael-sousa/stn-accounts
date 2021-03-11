@@ -34,12 +34,12 @@ func NewAuthenticated(jwtH *jwt.Handler) func(http.Handler) http.Handler {
 					response.WriteErr(w, r, appErr)
 					return
 				}
-				response.WriteErr(w, r, types.NewErr(types.AuthenticationErr, "unable to parse the authorization token", &err))
+				response.WriteErr(w, r, types.NewErr(types.AuthenticationErr, "unable to parse the authorization token", err))
 				return
 			}
 			id, err := strconv.ParseInt(claims.Issuer, 10, 64)
 			if err != nil {
-				response.WriteErr(w, r, types.NewErr(types.AuthenticationErr, "unable to parse the token issuer", &err))
+				response.WriteErr(w, r, types.NewErr(types.AuthenticationErr, "unable to parse the token issuer", err))
 				return
 			}
 			ctx := context.WithValue(r.Context(), CtxAccountID, id)

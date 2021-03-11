@@ -18,6 +18,17 @@ type loginHandler struct {
 	jwtHandler *jwt.Handler
 }
 
+// Login exposes the route that grants user authentication
+func Login(accountSrv *service.Account, jwtHandler *jwt.Handler) func(chi.Router) {
+	h := loginHandler{
+		accountSrv: accountSrv,
+		jwtHandler: jwtHandler,
+	}
+	return func(r chi.Router) {
+		r.Post("/", h.post)
+	}
+}
+
 // @ID post-login
 // @tags v1
 // @Summary Generates a new authorization token
@@ -55,16 +66,5 @@ func (h *loginHandler) post(w http.ResponseWriter, r *http.Request) {
 	if err = response.WriteSuccess(w, r, responseBody, nil); err != nil {
 		log.Error().Caller().Err(err).Msg("unable to encode body.LoginResponse into response")
 		response.WriteErr(w, r, err)
-	}
-}
-
-// Login exposes the route that grants user authentication
-func Login(accountSrv *service.Account, jwtHandler *jwt.Handler) func(chi.Router) {
-	h := loginHandler{
-		accountSrv: accountSrv,
-		jwtHandler: jwtHandler,
-	}
-	return func(r chi.Router) {
-		r.Post("/", h.post)
 	}
 }

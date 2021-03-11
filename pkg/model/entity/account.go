@@ -7,6 +7,13 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 )
 
+// Constants related to Account fields
+const (
+	AccountNameSize   int = 255
+	AccountCPFSize    int = 11
+	AccountSecretSize int = 50
+)
+
 // Account models a financial account
 type Account struct {
 	ID        int64
@@ -16,10 +23,3 @@ type Account struct {
 	Balance   types.Currency
 	CreatedAt time.Time
 }
-
-// Constants related to Account fields
-const (
-	AccountNameSize   int = 255
-	AccountCPFSize    int = 11
-	AccountSecretSize int = 50
-)

@@ -29,6 +29,8 @@ type account struct {
 	txr               *repository.Transactioner
 }
 
+var _ Account = (*account)(nil)
+
 // NewAccount returns a value responsible for managing entity.Account actions and integrity
 func NewAccount(txr *repository.Transactioner, accountRepository *repository.Account) Account {
 	return &account{

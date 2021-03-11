@@ -17,16 +17,24 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// Server exposes the services provived by the application via REST
+type Server interface {
+	Use(m ...func(http.Handler) http.Handler) *server
+	Start(c *env.RestConfig)
+}
+
 type server struct {
 	accountSrv  *service.Account
 	transferSrv *service.Transfer
 	middlewares []func(http.Handler) http.Handler
 }
 
-// Server exposes the services provived by the application via REST
-type Server interface {
-	Use(m ...func(http.Handler) http.Handler) *server
-	Start(c *env.RestConfig)
+// NewServer constructs a server with its required dependencies
+func NewServer(accountSrv *service.Account, transferSrv *service.Transfer) Server {
+	return &server{
+		accountSrv:  accountSrv,
+		transferSrv: transferSrv,
+	}
 }
 
 // Use appends the given middleware(s) to the server's middleware slice.
@@ -71,12 +79,4 @@ func (s *server) Start(cfg *env.RestConfig) {
 	}
 
 	<-waitShutdown
-}
-
-// NewServer constructs a server with its required dependencies
-func NewServer(accountSrv *service.Account, transferSrv *service.Transfer) Server {
-	return &server{
-		accountSrv:  accountSrv,
-		transferSrv: transferSrv,
-	}
 }

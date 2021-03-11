@@ -25,6 +25,8 @@ type transfer struct {
 	transferValidator  *validation.Transfer
 }
 
+var _ Transfer = (*transfer)(nil)
+
 // NewTransfer returns a value responsible for managing entity.Transfer integrity
 func NewTransfer(txr *repository.Transactioner, transferRepository *repository.Transfer, accountRepository *repository.Account) Transfer {
 	return &transfer{

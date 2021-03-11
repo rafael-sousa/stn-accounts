@@ -16,6 +16,14 @@ type Handler struct {
 	expTimeout time.Duration
 }
 
+// NewHandler creates a new JWT Handler
+func NewHandler(config *env.RestConfig) *Handler {
+	return &Handler{
+		secret:     config.Secret,
+		expTimeout: time.Duration(config.TokenExpTimeout),
+	}
+}
+
 // Generate creates a new JWT token with the given id
 func (h *Handler) Generate(id int64) (string, *jwtgo.StandardClaims, error) {
 	claims := jwtgo.StandardClaims{
@@ -54,12 +62,4 @@ func (h *Handler) Parse(tokenString string) (*jwtgo.StandardClaims, error) {
 		return nil, types.NewErr(types.AuthenticationErr, "unexpected token format", err)
 	}
 	return claims, nil
-}
-
-// NewHandler creates a new JWT Handler
-func NewHandler(config *env.RestConfig) *Handler {
-	return &Handler{
-		secret:     config.Secret,
-		expTimeout: time.Duration(config.TokenExpTimeout),
-	}
 }

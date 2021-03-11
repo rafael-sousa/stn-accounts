@@ -17,6 +17,16 @@ type accountHandler struct {
 	accountSrv *service.Account
 }
 
+// Accounts handle the requests related to entity.Account
+func Accounts(accountSrv *service.Account) func(chi.Router) {
+	h := accountHandler{accountSrv: accountSrv}
+	return func(r chi.Router) {
+		r.Get("/", h.get)
+		r.Post("/", h.post)
+		r.Get("/{id:[\\d]+}/balance", h.getBalance)
+	}
+}
+
 // @Summary Fetches a list of application accounts
 // @tags v1
 // @ID fetch-account-list
@@ -94,15 +104,5 @@ func (h *accountHandler) post(w http.ResponseWriter, r *http.Request) {
 	if err = response.WriteSuccess(w, r, view, view.ID); err != nil {
 		log.Error().Caller().Err(err).Msg("unable to encode the new account into the response")
 		response.WriteErr(w, r, err)
-	}
-}
-
-// Accounts handle the requests related to entity.Account
-func Accounts(accountSrv *service.Account) func(chi.Router) {
-	h := accountHandler{accountSrv: accountSrv}
-	return func(r chi.Router) {
-		r.Get("/", h.get)
-		r.Post("/", h.post)
-		r.Get("/{id:[\\d]+}/balance", h.getBalance)
 	}
 }

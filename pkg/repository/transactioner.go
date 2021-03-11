@@ -13,14 +13,19 @@ type txKey string
 // CtxTxKey is the context key that holds a tx value in a context.Context
 const CtxTxKey txKey = "txKey"
 
-type transactioner struct {
-	db *sql.DB
-}
-
 // Transactioner handles operations that store transactions in contexts and run functions within a transactional concept
 type Transactioner interface {
 	WithTx(ctx context.Context, fn func(context.Context) error) (err error)
 	GetConn(ctx context.Context) Connection
+}
+
+type transactioner struct {
+	db *sql.DB
+}
+
+// NewTxr creates a new Transactioner value
+func NewTxr(db *sql.DB) Transactioner {
+	return &transactioner{db: db}
 }
 
 // WithTx starts a db transaction and stores it on the specified context.
@@ -56,9 +61,4 @@ func (txr *transactioner) GetConn(ctx context.Context) Connection {
 		return conn
 	}
 	return txr.db
-}
-
-// NewTxr creates a new Transactioner value
-func NewTxr(db *sql.DB) Transactioner {
-	return &transactioner{db: db}
 }

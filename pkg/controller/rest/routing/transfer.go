@@ -18,6 +18,16 @@ type transferHandler struct {
 	transferSrv *service.Transfer
 }
 
+// Transfers handles the requests related to entity.Transfer
+func Transfers(transferSrv *service.Transfer, jwtHandler *jwt.Handler) func(chi.Router) {
+	h := transferHandler{transferSrv: transferSrv}
+	return func(r chi.Router) {
+		r.Use(middleware.NewAuthenticated(jwtHandler))
+		r.Get("/", h.get)
+		r.Post("/", h.post)
+	}
+}
+
 // @ID get-transfer
 // @tags v1
 // @Summary Gets the list of tranfers for the current authenticated user
@@ -81,15 +91,5 @@ func (h *transferHandler) post(w http.ResponseWriter, r *http.Request) {
 	if err = response.WriteSuccess(w, r, view, view.ID); err != nil {
 		log.Error().Caller().Err(err).Msg("unable to encode transfer into response")
 		response.WriteErr(w, r, err)
-	}
-}
-
-// Transfers handles the requests related to entity.Transfer
-func Transfers(transferSrv *service.Transfer, jwtHandler *jwt.Handler) func(chi.Router) {
-	h := transferHandler{transferSrv: transferSrv}
-	return func(r chi.Router) {
-		r.Use(middleware.NewAuthenticated(jwtHandler))
-		r.Get("/", h.get)
-		r.Post("/", h.post)
 	}
 }

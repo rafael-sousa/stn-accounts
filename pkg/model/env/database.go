@@ -24,11 +24,6 @@ type DatabaseConfig struct {
 	ParseTime       bool   `env:"DB_PARSE_TIME,default=true"`
 }
 
-// DataSourceName builds a datasource name by concatenating the props
-func (c *DatabaseConfig) DataSourceName() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=%t", c.User, c.Password, c.Host, c.Port, c.Name, c.ParseTime)
-}
-
 // NewDatabaseConfig retrives the environment settings related to the Rest API
 func NewDatabaseConfig(ctx *context.Context) DatabaseConfig {
 	var c DatabaseConfig
@@ -38,4 +33,9 @@ func NewDatabaseConfig(ctx *context.Context) DatabaseConfig {
 			Msg("Failed to read the db application environment properties")
 	}
 	return c
+}
+
+// DataSourceName builds a datasource name by concatenating the props
+func (c *DatabaseConfig) DataSourceName() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=%t", c.User, c.Password, c.Host, c.Port, c.Name, c.ParseTime)
 }

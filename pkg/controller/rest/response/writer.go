@@ -11,12 +11,6 @@ import (
 	"github.com/rafael-sousa/stn-accounts/pkg/model/types"
 )
 
-func appendHeaders(header http.Header) {
-	header.Set("Content-Type", "application/json")
-	header.Set("Accept", "application/json")
-	header.Set("Accept-Charset", "utf-8")
-}
-
 // WriteErr writes an appropriate error message into the http response.
 // It'll write a respose status code from either 4xx or 5xx category
 func WriteErr(w http.ResponseWriter, r *http.Request, err error) error {
@@ -66,4 +60,10 @@ func WriteSuccess(w http.ResponseWriter, r *http.Request, b interface{}, id inte
 	}
 	w.WriteHeader(status)
 	return json.NewEncoder(w).Encode(b)
+}
+
+func appendHeaders(header http.Header) {
+	header.Set("Content-Type", "application/json")
+	header.Set("Accept", "application/json")
+	header.Set("Accept-Charset", "utf-8")
 }

@@ -29,7 +29,7 @@ func TestAccountCreation(t *testing.T) {
 				}
 			},
 			assertErr:       testutil.AssertNoErr,
-			accountCreation: testutil.NewAccountCreation("John", "12345678900", "pw", 999),
+			accountCreation: testutil.NewAccountCreation("John", "71453945024", "pw", 999),
 		},
 		{
 			name: "validate account creation with empty name",
@@ -49,27 +49,7 @@ func TestAccountCreation(t *testing.T) {
 			assertErr: func(t *testing.T, err error) {
 				testutil.AssertCustomErr(t, types.ValidationErr, err, "field 'name' can't have trailing whitespace")
 			},
-			accountCreation: testutil.NewAccountCreation(" Dan", "12345678900", "pw", 999),
-		},
-		{
-			name: "validate account creation with cpf length less than 11 chars",
-			repo: func() repository.Account {
-				return &testutil.AccountRepoMock{}
-			},
-			assertErr: func(t *testing.T, err error) {
-				testutil.AssertCustomErr(t, types.ValidationErr, err, "field 'cpf' must have at least 11 characters")
-			},
-			accountCreation: testutil.NewAccountCreation("Jack", "2345678900", "pw", 999),
-		},
-		{
-			name: "validate account creation with cpf length more than 11 chars",
-			repo: func() repository.Account {
-				return &testutil.AccountRepoMock{}
-			},
-			assertErr: func(t *testing.T, err error) {
-				testutil.AssertCustomErr(t, types.ValidationErr, err, "field 'cpf' must have at most 11 characters")
-			},
-			accountCreation: testutil.NewAccountCreation("Bia", "123456789000", "pw", 999),
+			accountCreation: testutil.NewAccountCreation(" Dan", "71453945024", "pw", 999),
 		},
 		{
 			name: "validate account creation with empty cpf",
@@ -99,7 +79,7 @@ func TestAccountCreation(t *testing.T) {
 			assertErr: func(t *testing.T, err error) {
 				testutil.AssertCustomErr(t, types.ValidationErr, err, "field 'secret' is required")
 			},
-			accountCreation: testutil.NewAccountCreation("Olly", "00000000000", "", 999),
+			accountCreation: testutil.NewAccountCreation("Olly", "18474605008", "", 999),
 		},
 		{
 			name: "validate account creation with negative balance",
@@ -109,7 +89,7 @@ func TestAccountCreation(t *testing.T) {
 			assertErr: func(t *testing.T, err error) {
 				testutil.AssertCustomErr(t, types.ValidationErr, err, "field 'balance' must be greater than or equal to 0")
 			},
-			accountCreation: testutil.NewAccountCreation("Paul", "11111111111", "pw", -0.01),
+			accountCreation: testutil.NewAccountCreation("Paul", "44206294011", "pw", -0.01),
 		},
 		{
 			name: "validate account creation with existing cpf",
@@ -121,9 +101,9 @@ func TestAccountCreation(t *testing.T) {
 				}
 			},
 			assertErr: func(t *testing.T, err error) {
-				testutil.AssertCustomErr(t, types.ConflictErr, err, "field 'cpf' with value '22222222222' is already in use")
+				testutil.AssertCustomErr(t, types.ConflictErr, err, "field 'cpf' with value '28494002031' is already in use")
 			},
-			accountCreation: testutil.NewAccountCreation("Carol", "22222222222", "pw", 1),
+			accountCreation: testutil.NewAccountCreation("Carol", "28494002031", "pw", 1),
 		},
 	}
 	for _, tc := range tt {
@@ -147,7 +127,7 @@ func TestAccountLogin(t *testing.T) {
 	}{
 		{
 			name:      "validate login creation successfully",
-			cpf:       "00000000000",
+			cpf:       "06928541008",
 			secret:    "pw",
 			assertErr: testutil.AssertNoErr,
 		},
@@ -161,7 +141,7 @@ func TestAccountLogin(t *testing.T) {
 		},
 		{
 			name:   "validate login creation with no secret",
-			cpf:    "00000000000",
+			cpf:    "52803492083",
 			secret: "",
 			assertErr: func(t *testing.T, err error) {
 				testutil.AssertCustomErr(t, types.ValidationErr, err, "field 'secret' is required")

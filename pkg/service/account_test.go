@@ -36,7 +36,7 @@ func TestAccountServiceCreate(t *testing.T) {
 					},
 				}
 			},
-			d:         testutil.NewAccountCreation("John", "00000000000", "pw", 100),
+			d:         testutil.NewAccountCreation("John", "62202136029", "pw", 100),
 			assertErr: testutil.AssertNoErr,
 		},
 		{
@@ -217,9 +217,9 @@ func TestAccountServiceLogin(t *testing.T) {
 	}{
 		{
 			name:     "login with cpf and secret successfully",
-			expected: testutil.NewEntityAccount(1, "Sousa", "11111111111", "$2a$10$c3GzxvPAAMS9pDqB9XIYi.kT/PN7CxfRev.BsRLvAJqVcZnFiW05i", 0),
+			expected: testutil.NewEntityAccount(1, "Sousa", "41112075020", "$2a$10$c3GzxvPAAMS9pDqB9XIYi.kT/PN7CxfRev.BsRLvAJqVcZnFiW05i", 0),
 			secret:   "...",
-			cpf:      "11111111111",
+			cpf:      "41112075020",
 			repo: func(exp *entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{
 					ExpectFindBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
@@ -232,9 +232,9 @@ func TestAccountServiceLogin(t *testing.T) {
 		},
 		{
 			name:     "login with cpf and wrong secret",
-			expected: testutil.NewEntityAccount(2, "Alice", "22222222222", "123", 10),
+			expected: testutil.NewEntityAccount(2, "Alice", "24039310047", "123", 10),
 			secret:   "123",
-			cpf:      "22222222222",
+			cpf:      "24039310047",
 			repo: func(exp *entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{
 					ExpectFindBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
@@ -249,7 +249,7 @@ func TestAccountServiceLogin(t *testing.T) {
 		{
 			name:   "login with repository error",
 			secret: "...",
-			cpf:    "33333333333",
+			cpf:    "72098733097",
 			repo: func(exp *entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{
 					ExpectFindBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
@@ -264,7 +264,7 @@ func TestAccountServiceLogin(t *testing.T) {
 		{
 			name:   "login with nonexistent account",
 			secret: "...",
-			cpf:    "44444444444",
+			cpf:    "61632733030",
 			repo: func(exp *entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{
 					ExpectFindBy: func(ctx context.Context, cpf string) (*entity.Account, error) {
@@ -288,7 +288,7 @@ func TestAccountServiceLogin(t *testing.T) {
 		},
 		{
 			name: "login without secret",
-			cpf:  "55555555555",
+			cpf:  "87256640005",
 			repo: func(exp *entity.Account) repository.Account {
 				return &testutil.AccountRepoMock{}
 			},
